@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Button, Divider, Checkbox, Card, CardContent, Typography } from "@mui/material";
 import { Cart } from "../utils/types/cart_type";
 import { RootState } from "../redux/reducers";
@@ -10,14 +10,16 @@ import { AppDispatch } from "../redux/store";
 import { updateCartItem } from "../redux/reducers/cartReducer";
 
 const CartHistory = () => {
-    const [deliveryFee] = React.useState(2);
+    const [deliveryFee] = useState(2);
+    const [noContactDelivery, setNoContactDelivery] = useState(false); // Managing checkbox state
     const dispatch = useDispatch<AppDispatch>();
 
     const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
     const foodItems: FoodItem[] = useSelector((state: RootState) => state.menu.foodMenuItems);
-    //   const cartItems = useSelector((state: RootState) => state.cart.cart);
-    //   const { foodMenuItems } = useSelector((state: RootState) => state.menu);
 
+    const gstAndRestaurantCharges = 10; // You can make this dynamic if needed
+
+    // Memoizing the cart total calculation
     const cartTotal = useMemo(() => {
         return cart.reduce((total, cartItem) => {
             const foodItemMatch = foodItems.find(item => item.id === cartItem.itemId);
@@ -52,16 +54,18 @@ const CartHistory = () => {
         dispatch(updateCartItem(updatedCart));
     };
 
-
+    const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setNoContactDelivery(event.target.checked);
+    };
 
     return (
-        <Card className="max-w-md mx-auto bg-white shadow-lg rounded-lg border">
+        <Card className="max-w-md sm:max-w-lg mx-auto bg-white shadow-lg rounded-lg border">
             <CardContent className="p-6">
                 {/* Header Section */}
                 <div className="flex items-center gap-4">
                     <Image
                         src="https://testing.indiantadka.eu/assets/food.webp"
-                        alt="Food Image"
+                        alt="Food image for the restaurant menu"
                         width={50}
                         height={50}
                         className="rounded"
@@ -71,35 +75,41 @@ const CartHistory = () => {
                     </Typography>
                 </div>
                 <Divider className="my-2" />
-                {filteredFoodItems.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                        <div className="flex items-center w-[100px]">
-                            <div>
-                                <Typography variant="body2" className="text-gray-700 text-sm">
-                                    {item.itemName}
+
+                {filteredFoodItems.map((item, index) => {
+                    const cartItem = cart.find(cartItem => cartItem.itemId === item.id);
+                    const quantity = cartItem ? cartItem.quantity : 0;
+                    const itemTotal = item.price * quantity;
+
+                    return (
+                        <div key={index} className="flex items-center justify-between">
+                            <div className="flex items-center w-[100px]">
+                                <div>
+                                    <Typography variant="body2" className="text-gray-700 text-sm">
+                                        {item.itemName}
+                                    </Typography>
+                                    <Typography variant="caption" className="text-blue-500 cursor-pointer">Customize</Typography>
+                                </div>
+                            </div>
+                            <div className="flex items-center">
+                                <div className="flex w-[60px] items-center border px-2 py-1 bg-white-100 mr-3">
+                                    <Button className="min-w-3 p-0 text-sm" onClick={() => removeFromCart(item.id)}>-</Button>
+                                    <span className="text-sm ml-2 font-semibold text-green-600">
+                                        {quantity}
+                                    </span>
+                                    <Button className="min-w-6 p-0 text-sm font-semibold text-green-600" onClick={() => addToCart(item.id)}>+</Button>
+                                </div>
+                                <Typography variant="body2" className="font-semibold text-gray-800 text-sm">
+                                    €{itemTotal}
                                 </Typography>
-                                <Typography variant="caption" className="text-blue-500 cursor-pointer">Customize</Typography>
                             </div>
                         </div>
-                        <div className="flex items-center">
-                            <div className="flex  w-[60px] items-center border px-2 py-1 bg-white-100 mr-3">
-                                <Button className="min-w-3 p-0 text-sm" onClick={() => removeFromCart(item.id)}>-</Button>
-                                <span className="text-sm ml-2 font-semibold text-green-600">  {cart.find(cartItem => cartItem.itemId === item.id)?.quantity}
-                                </span>
-                                <Button className="min-w-6 p-0 text-sm font-semibold text-green-600" onClick={() => addToCart(item.id)}>+</Button>
-                            </div>
-                            <Typography variant="body2" className="font-semibold text-gray-800 text-sm">
-                                €{item.price * (cart.find(cartItem => cartItem.itemId === item.id)?.quantity || 0)}
-
-                            </Typography>
-                        </div>
-                    </div>
-                ))}
-
+                    );
+                })}
 
                 <Divider className="my-4" />
                 <div className="flex items-start gap-2">
-                    <Checkbox />
+                    <Checkbox checked={noContactDelivery} onChange={handleCheckboxChange} />
                     <Typography variant="body2" className="text-gray-700">
                         <strong>Opt in for No-contact Delivery</strong>
                         <br />Unwell, or avoiding contact? Please select no-contact delivery.
@@ -124,12 +134,12 @@ const CartHistory = () => {
                     </div>
                     <div className="flex justify-between mb-2">
                         <Typography>GST and Restaurant Charges</Typography>
-                        <Typography>€{10}</Typography>
+                        <Typography>€{gstAndRestaurantCharges}</Typography>
                     </div>
                     <Divider className="my-2" />
                     <div className="flex justify-between text-lg font-bold text-gray-800">
                         <Typography>TO PAY</Typography>
-                        <Typography>€{cartTotal + deliveryFee + 10}</Typography>
+                        <Typography>€{cartTotal + deliveryFee + gstAndRestaurantCharges}</Typography>
                     </div>
                 </div>
             </CardContent>

@@ -1,8 +1,18 @@
+
+"use client"
 import React from "react";
 import { Card, CardContent, CardHeader, Button } from "@mui/material";
 import AddLocationIcon from "@mui/icons-material/AddLocation";
+import AddNewAddress from "./AddNewAddress";
 
-const dummyAddresses = [
+interface Address {
+  id: number,
+  type: string,
+  label: string,
+  address: string,
+  eta: string
+}
+const dummyAddresses: Address[] = [
   {
     id: 1,
     type: "home",
@@ -16,21 +26,32 @@ const dummyAddresses = [
     label: "Work",
     address: "217, Fatehpur, Haryana 122018, India",
     eta: "42 MINS",
-  },
-];
+  }
+]
 
 const AddressSelection = () => {
+  const [isAddressModelOpen, setAddressModelOpen] = React.useState(false);
+
+  const onSubmit = () => {
+    // handle login form submit
+  };
+
   return (
     <div className="p-6 bg-gray-100">
+      <AddNewAddress onSubmit={onSubmit} isOpen={isAddressModelOpen} onClose={() => setAddressModelOpen(!isAddressModelOpen)} />
       <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
         <h2 className="text-xl font-bold">Choose a delivery address</h2>
         <p className="text-gray-600 mb-4">Multiple addresses in this location</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {dummyAddresses.map((address) => (
-            <Card 
-              key={address.id} 
-              className="border p-4 flex flex-col justify-between" 
-              style={{ height: '300px' }}
+            <Card
+              key={address.id}
+              className=" p-4 flex flex-col justify-between"
+              sx={{
+                minHeight: '300px',
+                border: '1px solid rgba(2, 6, 12, .1)', // Solid border for delivery address
+                boxShadow: 'none', // Remove box shadow
+              }}
             >
               <CardHeader
                 title={
@@ -49,9 +70,13 @@ const AddressSelection = () => {
               </Button>
             </Card>
           ))}
-          <Card 
-            className="border p-4 col-span-2 flex flex-col justify-between" 
-            style={{ height: '300px' }}
+          <Card
+            className="border p-4 flex flex-col justify-between"
+            sx={{
+              minHeight: '300px',
+              border: '2px dashed rgba(2, 6, 12, .1)', // Dashed border for Add New Address
+              boxShadow: 'none', // Remove box shadow
+            }}
           >
             <CardHeader
               title={
@@ -64,7 +89,8 @@ const AddressSelection = () => {
             <CardContent className="flex-grow">
               <p className="text-sm text-gray-600">Add a new address to proceed with your order.</p>
             </CardContent>
-            <Button className="mt-3 bg-green-600 text-white hover:bg-green-700 w-full">
+            <Button className="mt-3 bg-green-600 text-white hover:bg-green-700 w-full"
+              onClick={() => setAddressModelOpen(!isAddressModelOpen)}>
               ADD NEW
             </Button>
           </Card>

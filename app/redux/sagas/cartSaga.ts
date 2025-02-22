@@ -35,7 +35,6 @@ function* fetchCartSaga() {
   try {
     yield put(fetchCartStart());
     const cartData: Cart[] = yield call(fetchCartItemsApi);
-    console.log('cartData>>>>>',cartData)
     yield put(fetchCartSuccess(cartData));
   } catch(err) {
     console.log('err>>>>',err)
