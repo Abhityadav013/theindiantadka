@@ -5,6 +5,7 @@ import { StoreProvider } from "./redux/StoreProvider";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "./theme";
 import NavBarWrapper from "./components/NavBarWrapper";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 
 // Configure the Outfit font
@@ -30,8 +31,10 @@ export default function RootLayout({
         <body className={`${outfit.variable} app`}> {/* Apply Outfit font */}
         <ThemeProvider theme={theme}>
             <CssBaseline />
+            <GoogleOAuthProvider clientId="534846475345-c8ujfd7kormp4abkev4skgkl8s9urh3g.apps.googleusercontent.com">
             <NavBarWrapper />
             {children}
+            </GoogleOAuthProvider>
           </ThemeProvider>
          
         </body>
