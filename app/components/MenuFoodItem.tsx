@@ -21,7 +21,6 @@ const MenuFoodItem: React.FC<MenuFoodItemProps> = ({ food_item }) => {
   const { foodMenuItems } = useSelector((state: RootState) => state.menu);
 
   const addToCart = (id: string) => {
-    console.log('Step !>>>>>',id)
     const foodItem = foodMenuItems.find((item) => item.id === id);
     if (!foodItem) return;
 
@@ -33,7 +32,6 @@ const MenuFoodItem: React.FC<MenuFoodItemProps> = ({ food_item }) => {
     } else {
       updatedCart.push({ itemId: id, itemName: foodItem.itemName, quantity: 1 });
     }
-    console.log('Step final>>>>>',updatedCart)
     dispatch(updateCartItem(updatedCart));
   };
 
@@ -44,6 +42,7 @@ const MenuFoodItem: React.FC<MenuFoodItemProps> = ({ food_item }) => {
 
     dispatch(updateCartItem(updatedCart));
   };
+  
   return (
     <Card className="w-full max-w-xs rounded-lg shadow-md transition-transform hover:scale-105 flex flex-col">
     {/* Food Image */}
