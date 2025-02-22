@@ -1,31 +1,52 @@
 "use client"; // Client component directive
 
 import React, { useState } from "react";
-import { Button, Form, Input, Typography, Divider, Drawer } from "antd";
+import {
+    Drawer,
+    Button,
+    TextField,
+    Typography,
+    Divider,
+    IconButton,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close"; // Import close icon
 import { GoogleLogin } from "@react-oauth/google"; // Google login import
-
-const { Title, Text } = Typography;
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 // Define types for the props of the LoginForm component
 interface LoginFormProps {
     onSubmit: (values: LoginInput) => void;
     onGoogleLogin: (credential?: string) => void; // GoogleLogin's response is the credential string
+    isOpen: boolean;
+    onClose: () => void; // onClose function to close the drawer
 }
 
 export interface LoginInput {
     email: string;
     password: string;
+    phoneNumber?: string;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, onGoogleLogin }) => {
-    const [form] = Form.useForm(); // Ant Design form instance
+const LoginForm: React.FC<LoginFormProps> = ({
+    onSubmit,
+    onGoogleLogin,
+    isOpen,
+    onClose,
+}) => {
     const [isLoading, setIsLoading] = useState(false); // For handling loading state during form submission
+    const [isLogin, setIsLogin] = useState(true); // To toggle between Login and Sign Up
+    const [email, setEmail] = useState(""); // Email state
+    const [password, setPassword] = useState(""); // Password state
+    const [name, setName] = useState(""); // Name for sign-up
+    const [phoneNumber, setPhoneNumber] = useState(""); // Phone number for sign-up
+    const [confirmPassword, setConfirmPassword] = useState(""); // Confirm password for sign-up
 
     // Handle form submission
-    const handleSubmit = async (values: LoginInput) => {
+    const handleSubmit = async () => {
         setIsLoading(true);
         try {
-            await onSubmit(values); // Call the passed function for form submission (e.g., login API call)
+            await onSubmit({ email, password, phoneNumber }); // Call the passed function for form submission
         } catch (error) {
             console.error("Login failed:", error);
         }
@@ -34,66 +55,166 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, onGoogleLogin }) => {
 
     return (
         <Drawer
-            title={null}
-            placement={"right"} // Dynamic placement based on screen size
-            closable={true}
-            onClose={() => onSubmit}
-            open={true}
-            width={500}
-            className={`auth-drawer`} // Add class for mobile style if needed
+            anchor="right"
+            open={isOpen}
+            onClose={onClose}
+            sx={{
+                "& .MuiDrawer-paper": {
+                    width: "100%",
+                    maxWidth: "500px",
+                    height: "100%",
+                },
+            }}
         >
-            <div className="auth-drawer max-w-sm mx-auto p-6 bg-white rounded-lg shadow-md">
-                <div className="auth-header">
-                    <Title level={3} className="auth-title text-center text-2xl mb-6">Login</Title>
-                    <Text className="auth-subtext text-center mb-4">Please enter your details</Text>
+            <div className="w-full p-6 rounded-t-xl relative">
+                {/* Close button */}
+                <IconButton
+                    edge="start"
+                    color="inherit"
+                    onClick={onClose}
+                    sx={{ position: "absolute", top: 10, left: 10 }}
+                >
+                    <CloseIcon />
+                </IconButton>
+
+                <div className="text-center mb-6">
+                    <Typography variant="h5" className="text-xl text-tomato font-semibold">
+                        {isLogin ? "Login" : "Sign Up"}
+                    </Typography>
+                    <Typography
+                        variant="body2"
+                        className="text-sm mt-10 text-gray-600 pl-1 text-left"
+                    >
+                        Please enter your details
+                    </Typography>
                 </div>
 
-                <Form
-                    form={form}
-                    onFinish={handleSubmit}
-                    layout="vertical"
-                    initialValues={{ email: "", password: "" }}
-                >
-                    <Form.Item
+                {!isLogin && (
+                    <TextField
+                        label="Name"
+                        variant="outlined"
+                        fullWidth
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="mb-4"
+                        required
+                    />
+                )}
+
+                <div>
+                    <TextField
                         label="Email"
-                        name="email"
-                        rules={[{ required: true, type: "email", message: "Please enter a valid email address" }]}>
-                        <Input placeholder="Enter your email" className="auth-input" />
-                    </Form.Item>
+                        variant="outlined"
+                        fullWidth
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="mb-4"
+                        required
+                    />
 
-                    <Form.Item
+                    {!isLogin && (
+                        <PhoneInput
+                            country={"de"} // Default country set to Germany
+                            value={phoneNumber}
+                            onChange={setPhoneNumber}
+                            preferredCountries={["de"]} // Always show Germany at the top
+                            enableSearch={true} // Allow searching for country codes
+                            disableSearchIcon={false} // Show a search icon
+                            autoFormat={true} // Auto-format the input for better UX
+                            priority={{ de: 1 }} // Ensures 'DE' stays at the top of the list when opening
+                            inputStyle={{
+                                width: "100%",
+                                height: "56px",
+                                fontSize: "16px",
+                                paddingLeft: "50px", // Adjust space for flag & country code
+                                // borderRadius: "0px",
+                            }}
+                            containerStyle={{
+                                width: "100%",
+                                marginBottom: "16px",
+                            }}
+                            buttonStyle={{
+                                background: "transparent",
+                            }}
+                            dropdownStyle={{
+                                maxHeight: "250px", // Limit height to prevent excessive scrolling
+                                overflowY: "auto", // Enable scrolling
+                                zIndex: 1000, // Ensure it's above other elements
+                            }}
+                            searchStyle={{
+                                width: "90%",
+                                margin: "10px auto",
+                                padding: "8px",
+                                fontSize: "14px",
+                                borderRadius: "6px",
+                            }}
+                        />
+                    )}
+
+                    <TextField
                         label="Password"
-                        name="password"
-                        rules={[{ required: true, message: "Please enter your password!" }]}>
-                        <Input.Password placeholder="Enter your password" className="auth-input" />
-                    </Form.Item>
+                        variant="outlined"
+                        fullWidth
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="mb-4"
+                        required
+                    />
 
-                    <Form.Item>
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            block
-                            loading={isLoading}
-                            className="auth-button"
-                        >
-                            Login
-                        </Button>
-                    </Form.Item>
-                </Form>
+                    {!isLogin && (
+                        <TextField
+                            label="Confirm Password"
+                            variant="outlined"
+                            fullWidth
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="mb-4"
+                            required
+                        />
+                    )}
+                </div>
 
-                <Divider className="auth-divider">OR</Divider>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    onClick={handleSubmit}
+                    disabled={isLoading}
+                    className="mb-4"
+                >
+                    {isLoading ? (isLogin ? "Logging in..." : "Signing up...") : isLogin ? "Login" : "Sign Up"}
+                </Button>
 
-                <div className="text-center">
+                <Divider className="mb-4">OR</Divider>
+
+                <div className="text-center mb-4">
                     <GoogleLogin
-                        onSuccess={({ credential }) => onGoogleLogin(credential)} // Pass the credential to onGoogleLogin
+                        onSuccess={({ credential }) => onGoogleLogin(credential)}
                         onError={() => alert("Google login failed")}
                     />
                 </div>
 
-                <div className="mt-4 text-center">
-                    <Text>
-                        Don&apos;t have an account? <a href="/signup" className="text-blue-500">Sign Up</a>
-                    </Text>
+                <div className="text-center">
+                    <Typography variant="body2" className="text-sm">
+                        {isLogin ? (
+                            <>
+                                Don&apos;t have an account?{" "}
+                                <Button onClick={() => setIsLogin(false)} color="primary">
+                                    Sign Up
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                Already have an account?{" "}
+                                <Button onClick={() => setIsLogin(true)} color="primary">
+                                    Login
+                                </Button>
+                            </>
+                        )}
+                    </Typography>
                 </div>
             </div>
         </Drawer>

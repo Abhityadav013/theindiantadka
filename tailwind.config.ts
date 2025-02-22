@@ -11,6 +11,7 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        tomato: '#FF6347',  // This is the tomato color hex code
       },
     },
   },
