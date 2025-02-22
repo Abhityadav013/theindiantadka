@@ -1,4 +1,3 @@
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import Header from "./components/Header";
 import ExploreMenuWrapper from "./components/ExploreMenuWrapper";
 import FoodDisplayWrapper from "./components/FoodDisplayWrapper";
@@ -14,16 +13,16 @@ async function getMenuData() {
       fetch(`${menu_url}/category`, { next: { revalidate: 3600 } }),
     ]);
 
-    const foodMenuItems:FoodItem[] = await menuResponse.json();
-    const foodCategoryItems:FoodCategory[] = await categoryResponse.json();
-    const filteredMenuItem:FoodItem[] = foodMenuItems.filter((cat) => cat.isDelivery)
-    const filteredMenuCategoryItems:FilteredMenuItem[] = foodCategoryItems
-    .filter((cat) => cat.isDelivery)
-    .map((cat) => ({
-      menu_name: cat.categoryName,
-      menu_image: cat.imageUrl,
-    }));
-    
+    const foodMenuItems: FoodItem[] = await menuResponse.json();
+    const foodCategoryItems: FoodCategory[] = await categoryResponse.json();
+    const filteredMenuItem: FoodItem[] = foodMenuItems.filter((cat) => cat.isDelivery)
+    const filteredMenuCategoryItems: FilteredMenuItem[] = foodCategoryItems
+      .filter((cat) => cat.isDelivery)
+      .map((cat) => ({
+        menu_name: cat.categoryName,
+        menu_image: cat.imageUrl,
+      }));
+
     return { filteredMenuItem, filteredMenuCategoryItems };
   } catch (error) {
     console.error("Error fetching menu data:", error);
@@ -33,13 +32,13 @@ async function getMenuData() {
 
 export default async function Home() {
   const { filteredMenuItem, filteredMenuCategoryItems } = await getMenuData();
-  
+
   return (
-    <GoogleOAuthProvider clientId="534846475345-c8ujfd7kormp4abkev4skgkl8s9urh3g.apps.googleusercontent.com">
-      {/* <NavBar /> */}
+    <>
       <Header />
       <ExploreMenuWrapper menu_list={filteredMenuCategoryItems} />
       <FoodDisplayWrapper food_list={filteredMenuItem} />
-    </GoogleOAuthProvider>
+    </>
+
   );
 }

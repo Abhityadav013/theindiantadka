@@ -4,6 +4,9 @@ import React from "react";
 import { Card, CardContent, CardHeader, Button } from "@mui/material";
 import AddLocationIcon from "@mui/icons-material/AddLocation";
 import AddNewAddress from "./AddNewAddress";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../redux/reducers";
+import { AppDispatch } from "../redux/store";
 
 interface Address {
   id: number,
@@ -30,15 +33,22 @@ const dummyAddresses: Address[] = [
 ]
 
 const AddressSelection = () => {
-  const [isAddressModelOpen, setAddressModelOpen] = React.useState(false);
+  const isAddressModelOpen = useSelector((state: RootState) => state.address.addressModel);
+  const dispatch = useDispatch<AppDispatch>();
 
   const onSubmit = () => {
     // handle login form submit
   };
+  const opemAddressDrawer = () =>{
+    dispatch({ type: "address/openAddressModel" });
+  }
+  const closeAddressDrawer = () =>{
+    dispatch({ type: "address/closeAddressModel" });
+  }
 
   return (
     <div className="p-6 bg-gray-100">
-      <AddNewAddress onSubmit={onSubmit} isOpen={isAddressModelOpen} onClose={() => setAddressModelOpen(!isAddressModelOpen)} />
+      <AddNewAddress onSubmit={onSubmit} isOpen={isAddressModelOpen} onClose={closeAddressDrawer} />
       <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
         <h2 className="text-xl font-bold">Choose a delivery address</h2>
         <p className="text-gray-600 mb-4">Multiple addresses in this location</p>
@@ -90,7 +100,7 @@ const AddressSelection = () => {
               <p className="text-sm text-gray-600">Add a new address to proceed with your order.</p>
             </CardContent>
             <Button className="mt-3 bg-green-600 text-white hover:bg-green-700 w-full"
-              onClick={() => setAddressModelOpen(!isAddressModelOpen)}>
+              onClick={opemAddressDrawer}>
               ADD NEW
             </Button>
           </Card>
