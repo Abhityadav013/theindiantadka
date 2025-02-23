@@ -38,7 +38,7 @@ const AddressSelection = () => {
           const parsedLocation = JSON.parse(storedLocation);
 
           // Check if address is empty and location data hasn't been fetched yet
-          if (Object.keys(address).length === 0 && !isAddressFetched) {
+          if (!address && Object.keys(address).length === 0 && !isAddressFetched) {
             setIsAddressFetched(true); // Set flag to prevent further API calls
 
             // Call the API to get the address
@@ -55,7 +55,7 @@ const AddressSelection = () => {
     };
 
     // Run the function to fetch location data only once
-    if (Object.keys(address).length === 0 && isLoading) {
+    if (!address && Object.keys(address).length === 0 && isLoading) {
       fetchLocationData();
     }
 
