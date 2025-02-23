@@ -28,7 +28,7 @@ export type ErrorResponse = FieldError[];
 
 const NavBar = () => {
   const [userDetails, setUserDetails] = useState<UserProfile | null>(null);
-  const [formError,setFormError] = useState<ErrorResponse>([])
+  const [formError, setFormError] = useState<ErrorResponse>([])
   const [isLoading, setLoading] = useState(true)
   const [isLogin, setIsLogin] = useState(false);
   const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
@@ -89,13 +89,13 @@ const NavBar = () => {
         setIsLogin(false);
       }
     } catch (err) {
-      if(axios.isAxiosError(err)){
-        setFormError( err.response?.data?.data)
+      if (axios.isAxiosError(err)) {
+        setFormError(err.response?.data?.data)
       }
     }
   };
 
-  const onSignIn = async(values:SignInInput) => {
+  const onSignIn = async (values: SignInInput) => {
     try {
       const response = await api.post(
         `${base_url}/register`,
@@ -111,13 +111,13 @@ const NavBar = () => {
         setIsLogin(false);
       }
     } catch (err) {
-      if(axios.isAxiosError(err)){
-        setFormError( err.response?.data?.data)
+      if (axios.isAxiosError(err)) {
+        setFormError(err.response?.data?.data)
       }
     }
     // handle login form submit
   };
-  
+
 
   const logoutUser = async () => {
     try {
@@ -206,7 +206,7 @@ const NavBar = () => {
           <UserProfileMenu userData={userDetails} logoutUser={logoutUser} sendOTP={sendOTP} />
         )}
         {
-          isLogin && <LoginForm onLogin={onLogin} onSignIn={onSignIn} onGoogleLogin={onGoogleLogin} isOpen={isLogin} onClose={() => setIsLogin(!isLogin)} error={formError} setFormError={setFormError}/>
+          isLogin && <LoginForm onLogin={onLogin} onSignIn={onSignIn} onGoogleLogin={onGoogleLogin} isOpen={isLogin} onClose={() => setIsLogin(!isLogin)} error={formError} setFormError={setFormError} />
         }
 
         {

@@ -11,21 +11,13 @@ const NavBarWrapper = () => {
             {/* Logo */}
             <Link href="/">
                 <Image
-                    src="https://testing.indiantadka.eu/logo.png"
+                    src="https://testing.indiantadka.eu/logo.jpg"
                     alt="Logo"
-                    width={180}
-                    height={38}
+                    width={80}
+                    height={18}
                     className="dark:invert w-[150px] md:w-[140px] sm:w-[120px]"
                 />
             </Link>
-
-            {/* Navigation Links */}
-            <Box className="hidden md:flex gap-5 text-[#49557e] text-lg sm:text-base">
-                <Link href="/" className="hover:text-tomato">Home</Link>
-                <a href="#explore-menu" className="hover:text-tomato">Menu</a>
-                <a href="#app-download" className="hover:text-tomato">App Download</a>
-                <a href="#footer" className="hover:text-tomato">Contact Us</a>
-            </Box>
             <NavBar/>
         </Box>
     );
