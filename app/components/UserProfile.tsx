@@ -4,21 +4,22 @@ import { Logout, ShoppingCart, VerifiedUser, Person } from "@mui/icons-material"
 import { UserProfile } from "../utils/types/user_details";
 
 interface ProfileFormProps {
-    logoutUser: () => void;
-    userData: UserProfile;
+  logoutUser: () => void;
+  sendOTP:()=>void;
+  userData: UserProfile;
 }
 
-const UserProfileMenu:React.FC<ProfileFormProps> = ({ userData, logoutUser }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
+const UserProfileMenu: React.FC<ProfileFormProps> = ({ userData, logoutUser,sendOTP }) => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
   if (!userData) {
     return null; // Return nothing if user is not logged in
   }
 
-//   const handleMenuOpen = (event) => {
-//     setAnchorEl(event.currentTarget);
-//   };
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget); // Set the anchor element when the icon button is clicked
+  };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
@@ -30,7 +31,7 @@ const UserProfileMenu:React.FC<ProfileFormProps> = ({ userData, logoutUser }) =>
   return (
     <div>
       <Tooltip title="User Menu">
-        <IconButton className="p-1">
+        <IconButton className="p-1" onClick={handleMenuOpen}> {/* Add onClick to open the menu */}
           <Avatar className="bg-blue-500 text-white">{initials}</Avatar>
         </IconButton>
       </Tooltip>
@@ -43,14 +44,11 @@ const UserProfileMenu:React.FC<ProfileFormProps> = ({ userData, logoutUser }) =>
         <MenuItem onClick={handleMenuClose} className="flex gap-2">
           <Person fontSize="small" /> Profile
         </MenuItem>
-        <MenuItem className="flex gap-2">
-            <VerifiedUser fontSize="small" /> Verify Account
-          </MenuItem>
-        {/* {!isAccountVerified && (
+        {!userData.isAccountVerified && (
           <MenuItem onClick={() => { sendOTP(); handleMenuClose(); }} className="flex gap-2">
             <VerifiedUser fontSize="small" /> Verify Account
           </MenuItem>
-        )} */}
+        )}
         <MenuItem onClick={handleMenuClose} className="flex gap-2">
           <ShoppingCart fontSize="small" /> Your Orders
         </MenuItem>

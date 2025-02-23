@@ -4,6 +4,11 @@ export interface Cart {
     quantity:number
 }
 
+export interface CartDescription{
+    itemId:string;
+    description:string
+}
+
 export interface CartItem{
     cart:CartItem[]
 }
