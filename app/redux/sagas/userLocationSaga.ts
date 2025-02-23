@@ -6,7 +6,6 @@ import { base_url } from "@/app/utils/api_url";
 import { DeviceInfo } from "@/app/utils/types/device_info_type";
 import api from "@/app/utils/axiosInstance";
 
-// Function to get user location
 const getUserLocation = (): Promise<UserLocation> =>
   new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
@@ -35,8 +34,6 @@ const registerSessionAPI = async (
     params,
     withCredentials: true,
   });
-
-  console.log("API Response:", response.data); // Debugging
 
   return response.data.data; // ✅ Return only data, not the entire response object
 };

@@ -16,7 +16,8 @@ import "react-phone-input-2/lib/style.css";
 
 // Define types for the props of the LoginForm component
 interface LoginFormProps {
-    onSubmit: (values: LoginInput) => void;
+    onLogin: (values: LoginInput) => void;
+    onSignIn: (values: SignInInput) => void;
     onGoogleLogin: (credential?: string) => void; // GoogleLogin's response is the credential string
     isOpen: boolean;
     onClose: () => void; // onClose function to close the drawer
@@ -25,11 +26,19 @@ interface LoginFormProps {
 export interface LoginInput {
     email: string;
     password: string;
-    phoneNumber?: string;
+}
+
+export interface SignInInput {
+    name:string;
+    email: string;
+    phoneNumber:string;
+    password: string;
+    confirmPassword:string
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({
-    onSubmit,
+    onLogin,
+    onSignIn,
     onGoogleLogin,
     isOpen,
     onClose,
@@ -46,7 +55,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
     const handleSubmit = async () => {
         setIsLoading(true);
         try {
-            await onSubmit({ email, password, phoneNumber }); // Call the passed function for form submission
+            if(isLogin){
+                await onLogin({ email, password }); // Call the passed function for form submission
+            }else{
+                await onSignIn({ name, email,phoneNumber, password,confirmPassword  }); // Call the passed function for form submission
+            }
+           
         } catch (error) {
             console.error("Login failed:", error);
         }

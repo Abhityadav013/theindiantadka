@@ -49,7 +49,7 @@ const CartHistory = () => {
     const removeFromCart = (id: string) => {
         const updatedCart = cart
             .map((cartItem) => cartItem.itemId === id ? { ...cartItem, quantity: cartItem.quantity - 1 } : cartItem)
-            .filter((cartItem) => cartItem.quantity > 0);
+            // .filter((cartItem) => cartItem.quantity > 0);
 
         dispatch(updateCartItem(updatedCart));
     };

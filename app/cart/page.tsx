@@ -12,23 +12,19 @@ import Loader from "../components/Loader";
 const CartItem = () => {
   const { cart: cartItems } = useSelector((state: RootState) => state.cart);
   const [isLoading, setIsLoading] = React.useState(true);
-  // const [isAddressModelOpen, setAddressModelOpen] = React.useState(false);
 
   useEffect(() => {
-    debugger
     if (cartItems.length > 0) {
-      setIsLoading(false); // If no items, hide loader
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 700); // 5000 ms = 5 seconds
     } else {
       // Simulate a 5-second delay before showing the data
       setTimeout(() => {
         setIsLoading(false);
-      }, 5000); // 5000 ms = 5 seconds
+      }, 50); // 5000 ms = 5 seconds
     }
   }, [cartItems]);
-
-    // const onSubmit = () => {
-    //   // handle login form submit
-    // };
   
   return isLoading ? (
     <Loader loadingImage={'https://testing.indiantadka.eu/assets/cart-item-loader.gif'} isLoading={isLoading} />

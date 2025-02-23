@@ -6,6 +6,7 @@ export interface UserLocation {
   
   export interface UserState {
     userLocation: UserLocation | null;
+    
     isLoading: boolean;
   }
   

@@ -1,5 +1,4 @@
 import { call, put, select, takeLatest } from "redux-saga/effects";
-import axios from "axios";
 import { base_url } from "../../utils/api_url";
 import { Cart } from "@/app/utils/types/cart_type";
 import { 
@@ -14,9 +13,8 @@ import api from "@/app/utils/axiosInstance";
 
 // Fetch cart items from API
 export const fetchCartItemsApi = async (): Promise<Cart[]> => {
-  const response = await axios.post(`${base_url}/cart`, {}, { withCredentials: true });
-  console.log('response.....',response.data.data)
-  return response.data.data.cart.cartItems || [];
+  const response = await api.post(`${base_url}/cart`, {}, { withCredentials: true });
+  return response.data.data?.cart?.cartItems || [];
 };
 
 // Update cart items in API

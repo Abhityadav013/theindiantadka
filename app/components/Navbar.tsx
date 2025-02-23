@@ -1,33 +1,89 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import LoginForm from "./LoginForm";
+import React, { useCallback, useEffect, useState } from "react";
+import LoginForm, { LoginInput } from "./LoginForm";
 import { Box, IconButton } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle"; // Profile icon import
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/reducers";
 import { Cart } from "../utils/types/cart_type";
+import { base_url } from "../utils/api_url";
+import api from "../utils/axiosInstance";
+import { UserProfile } from "../utils/types/user_details";
+import { fetchUserSuccess } from "../redux/reducers/userProfileReducer";
+import UserProfileMenu from "./UserProfile";
 
 const NavBar = () => {
+  const [userDetails, setUserDetails] = useState<UserProfile | null>(null);
+  const [isLogin, setIsLogin] = useState(false);
   const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
   const dispatch = useDispatch()
 
-  const onSubmit = () => {
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await api.get(`${base_url}/profile`, {
+        withCredentials: true,
+      });
+      setUserDetails(response.data.data.userDetails);
+      dispatch(fetchUserSuccess(response.data.data.userDetails))
+    } catch (err) {
+      console.error("Error fetching user:", err);
+      setUserDetails(null);
+    }
+  }, [dispatch]);
+
+  const onLogin = async (values: LoginInput) => {
+    try {
+      const response = await api.post(
+        `${base_url}/login`,
+        { email: values.email, password: values.password },
+        { withCredentials: true }
+      );
+      if (response.data.statusCode === 200) {
+        fetchUser(); // Fetch user after successful login
+        setIsLogin(false);
+      }
+    } catch (err) {
+      console.error("Login failed:", err);
+    }
+  };
+
+  const onSignIn = () => {
     // handle login form submit
   };
 
+  const logoutUser = async () => {
+    try {
+      const response = await api.post(`${base_url}/logout`, {
+        withCredentials: true,
+      });
+      if (response.data.statusCode === 200) {
+        setUserDetails(null);
+        // setCartItems({});
+        // setCartItemCount(0);
+        // handleCart();
+        // handleRedirectPage("/");
+        // navigate("/");
+      }
+    } catch (err) {
+      console.error("Error logging out:", err);
+    }
+  };
   const onGoogleLogin = () => {
     // handle google login
   };
-
-  const [isLogin, setIsLogin] = useState(false);
+  useEffect(() => {
+    if (!userDetails) {
+      fetchUser();
+    }
+  }, [fetchUser, userDetails])
 
   useEffect(() => {
     dispatch({ type: "user/fetchUserLocation" });
     dispatch({ type: "menu/fetchMenuSaga" });
     dispatch({ type: "cart/fetchCartSaga" });
-
+    dispatch({ type: "address/fetchUserAddressSaga" })
   }, [dispatch]);
   return (
     <Box className="flex items-center gap-10 md:gap-7 sm:gap-5">
@@ -55,12 +111,16 @@ const NavBar = () => {
       </Box>
 
       {/* Profile Circle with Account Icon */}
-      <IconButton>
-        <AccountCircleIcon onClick={() => setIsLogin(true)} sx={{ fontSize: "30px", borderRadius: '50%', background: "tomato", fill: "azure" }} /> {/* Profile icon */}
+      <IconButton component="span">
+        {
+          !userDetails
+            ? <AccountCircleIcon onClick={() => setIsLogin(true)} sx={{ fontSize: "30px", borderRadius: '50%', background: "tomato", fill: "azure" }} />
+            : <UserProfileMenu userData={userDetails} logoutUser={logoutUser} />
+        }
       </IconButton>
 
       {
-        isLogin && <LoginForm onSubmit={onSubmit} onGoogleLogin={onGoogleLogin} isOpen={isLogin} onClose={() => setIsLogin(!isLogin)} />
+        isLogin && <LoginForm onLogin={onLogin} onSignIn={onSignIn} onGoogleLogin={onGoogleLogin} isOpen={isLogin} onClose={() => setIsLogin(!isLogin)} />
       }
     </Box>
   );
