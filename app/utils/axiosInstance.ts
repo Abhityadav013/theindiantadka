@@ -9,7 +9,10 @@ const api = axios.create({
 // Request Interceptor (Optional: If you need to modify headers)
 api.interceptors.request.use(
   (config) => {
-    console.log("Sending request:", config.url);
+     const tid = sessionStorage.getItem("tid"); // Retrieve tid from session storage
+    if (tid) {
+      config.headers["tid"] = tid; // Add tid to request headers
+    }
     return config;
   },
   (error) => {

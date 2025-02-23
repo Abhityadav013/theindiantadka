@@ -1,20 +1,22 @@
 "use client";
 import React, { useMemo, useState } from "react";
 import { Button, Divider, Checkbox, Card, CardContent, Typography } from "@mui/material";
-import { Cart } from "../utils/types/cart_type";
+import { CartDescription } from "../utils/types/cart_type";
 import { RootState } from "../redux/reducers";
 import { useDispatch, useSelector } from "react-redux";
 import { FoodItem } from "../utils/types/menu_type";
 import Image from "next/image";
 import { AppDispatch } from "../redux/store";
-import { updateCartItem } from "../redux/reducers/cartReducer";
+import { updateCartDescriptionItem, updateCartItem } from "../redux/reducers/cartReducer";
+import CartDialog, { DescriptionSubmit } from "./CartDialog";
 
 const CartHistory = () => {
     const [deliveryFee] = useState(2);
     const [noContactDelivery, setNoContactDelivery] = useState(false); // Managing checkbox state
+    const [isCustomizeModal, setCustomizeModal] = useState(false)
     const dispatch = useDispatch<AppDispatch>();
 
-    const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
+    const {cart,cartDescriptions} = useSelector((state: RootState) => state.cart);
     const foodItems: FoodItem[] = useSelector((state: RootState) => state.menu.foodMenuItems);
 
     const gstAndRestaurantCharges = 10; // You can make this dynamic if needed
@@ -49,7 +51,7 @@ const CartHistory = () => {
     const removeFromCart = (id: string) => {
         const updatedCart = cart
             .map((cartItem) => cartItem.itemId === id ? { ...cartItem, quantity: cartItem.quantity - 1 } : cartItem)
-            .filter((cartItem) => cartItem.quantity > 0);
+        // .filter((cartItem) => cartItem.quantity > 0);
 
         dispatch(updateCartItem(updatedCart));
     };
@@ -57,6 +59,14 @@ const CartHistory = () => {
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setNoContactDelivery(event.target.checked);
     };
+
+    const handleCustomizeModal = () => {
+        setCustomizeModal(() => !isCustomizeModal)
+    }
+    const handleItemDescription = (value: DescriptionSubmit) => {
+        const description:CartDescription =value.description
+        dispatch(updateCartDescriptionItem(description))
+    }
 
     return (
         <Card className="max-w-md sm:max-w-lg mx-auto bg-white shadow-lg rounded-lg border">
@@ -80,7 +90,8 @@ const CartHistory = () => {
                     const cartItem = cart.find(cartItem => cartItem.itemId === item.id);
                     const quantity = cartItem ? cartItem.quantity : 0;
                     const itemTotal = item.price * quantity;
-
+                 
+                    const cartDescription= cartDescriptions.find((di) => di.itemId === item.id)
                     return (
                         <div key={index} className="flex items-center justify-between">
                             <div className="flex items-center w-[100px]">
@@ -88,7 +99,12 @@ const CartHistory = () => {
                                     <Typography variant="body2" className="text-gray-700 text-sm">
                                         {item.itemName}
                                     </Typography>
-                                    <Typography variant="caption" className="text-blue-500 cursor-pointer">Customize</Typography>
+                                    <Typography variant="caption" className="text-blue-500 cursor-pointer" onClick={() => setCustomizeModal(true)}>Customize</Typography>
+                                    {
+                                        isCustomizeModal && (
+                                            <CartDialog isOpen={isCustomizeModal} onClose={handleCustomizeModal} foodData={{ itemId: item.id, itemName: item.itemName }} onSubmit={handleItemDescription} cartDescription={String(cartDescription?.description)} />
+                                        )
+                                    }
                                 </div>
                             </div>
                             <div className="flex items-center">

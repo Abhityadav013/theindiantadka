@@ -4,11 +4,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import HomeIcon from "@mui/icons-material/Home";
 import WorkIcon from "@mui/icons-material/Work";
 import NotListedLocationIcon from '@mui/icons-material/NotListedLocation';
+import { Address } from '../utils/types/address_type';
+
 
 interface AddressFormProps {
     onSubmit: (values: AddressInput) => void;
     isOpen: boolean;
     onClose: () => void; // onClose function to close the drawer
+    address: Address
 }
 
 export interface AddressInput {
@@ -24,14 +27,22 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
     onSubmit,
     isOpen,
     onClose,
+    address
 }
 ) => {
     const [flatNumber, setFlatNumber] = React.useState("");
     const [buildingNumber, setBuildingNumber] = React.useState("");
-    const [street, setStreet] = React.useState("");
-    const [pincode, setPincode] = React.useState("");
+    const [street, setStreet] = React.useState<string>("");
+    const [pincode, setPincode] = React.useState<string>("");
     const [addressType, setAddressType] = React.useState("")
 
+    React.useEffect(() => {
+        if (address) {
+            setStreet(address.road || "");
+            setPincode(address.postcode || "");
+            setBuildingNumber(address.house_number|| "")
+        }
+    }, [address]);
 
     const handleSubmit = async () => {
         try {
@@ -109,36 +120,36 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
 
                     <div className="flex border-0 mb-4">
                         <Chip
-                        icon={<HomeIcon />}
+                            icon={<HomeIcon />}
                             label="Home"
                             clickable
-                            color={addressType === "Home" ? "primary" : "default"}
-                            onClick={() => setAddressType("Home")}
-                            variant={addressType === "Home" ? "filled" : "outlined"}
+                            color={addressType === "home" ? "primary" : "default"}
+                            onClick={() => setAddressType("home")}
+                            variant={addressType === "home" ? "filled" : "outlined"}
                             style={{
                                 borderRadius: 0, // Square edges
                                 marginRight: 0, // No space between chips
                             }}
                         />
                         <Chip
-                        icon={<WorkIcon />}
+                            icon={<WorkIcon />}
                             label="Work"
                             clickable
-                            color={addressType === "Work" ? "primary" : "default"}
-                            onClick={() => setAddressType("Work")}
-                            variant={addressType === "Work" ? "filled" : "outlined"}
+                            color={addressType === "work" ? "primary" : "default"}
+                            onClick={() => setAddressType("work")}
+                            variant={addressType === "work" ? "filled" : "outlined"}
                             style={{
                                 borderRadius: 0, // Square edges
                                 marginRight: 0, // No space between chips
                             }}
                         />
                         <Chip
-                        icon={<NotListedLocationIcon />}
+                            icon={<NotListedLocationIcon />}
                             label="Other"
                             clickable
-                            color={addressType === "Other" ? "primary" : "default"}
-                            onClick={() => setAddressType("Other")}
-                            variant={addressType === "Other" ? "filled" : "outlined"}
+                            color={addressType === "other" ? "primary" : "default"}
+                            onClick={() => setAddressType("other")}
+                            variant={addressType === "other" ? "filled" : "outlined"}
                             style={{
                                 borderRadius: 0, // Square edges
                                 marginRight: 0, // No space between chips
@@ -146,22 +157,19 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
                         />
                     </div>
                     <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    onClick={handleSubmit}
-                    className="mb-4 bg-tomato"
-                    sx={{
-                        height: '46px', // Set the height of the button to match the TextField height
-                    }}
-                >
-                    SAVE ADDRESS & PROCEED
-                </Button>
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        onClick={handleSubmit}
+                        className="mb-4 bg-tomato"
+                        sx={{
+                            height: '46px', // Set the height of the button to match the TextField height
+                        }}
+                    >
+                        SAVE ADDRESS & PROCEED
+                    </Button>
 
                 </div>
-
-
-           
             </div>
         </Drawer>
     )

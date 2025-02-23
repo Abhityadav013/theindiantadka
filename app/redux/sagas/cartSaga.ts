@@ -1,9 +1,14 @@
 import { call, put, select, takeLatest } from "redux-saga/effects";
-import axios from "axios";
 import { base_url } from "../../utils/api_url";
-import { Cart } from "@/app/utils/types/cart_type";
-import { 
-  fetchCartFailure, fetchCartStart, fetchCartSuccess,
+import { Cart, CartDescription } from "@/app/utils/types/cart_type";
+import {
+  fetchCartDescriptionFailure,
+  fetchCartDescriptionStart,
+  fetchCartDescriptionSuccess,
+  fetchCartFailure,
+  fetchCartStart,
+  fetchCartSuccess,
+  updateCartDescriptionSuccess,
   updateCartFailure,
   updateCartStart,
   updateCartSuccess,
@@ -14,14 +19,23 @@ import api from "@/app/utils/axiosInstance";
 
 // Fetch cart items from API
 export const fetchCartItemsApi = async (): Promise<Cart[]> => {
-  const response = await axios.post(`${base_url}/cart`, {}, { withCredentials: true });
-  console.log('response.....',response.data.data)
-  return response.data.data.cart.cartItems || [];
+  const response = await api.post(
+    `${base_url}/cart`,
+    {},
+    { withCredentials: true }
+  );
+  return response.data.data?.cart?.cartItems || [];
+};
+
+export const fetchCartItemsAddonsApi = async (): Promise<CartDescription[]> => {
+  const response = await api.get(`${base_url}/cart-description`, {
+    withCredentials: true,
+  });
+  return response.data.data?.cartDescription || [];
 };
 
 // Update cart items in API
 export const updateCartItemsApi = async (cart: Cart[]): Promise<Cart[]> => {
-  console.log('base_urlbase_urlbase_urlbase_urlbase_url>>>>>',base_url)
   const response = await api.post(
     `${base_url}/cart`,
     { cart },
@@ -30,15 +44,45 @@ export const updateCartItemsApi = async (cart: Cart[]): Promise<Cart[]> => {
   return response.data.data.cart.cartItems || [];
 };
 
+export const updateCartDescriptionApi = async (
+  cartDescription: CartDescription
+): Promise<CartDescription[]> => {
+  // Fetch current user addresses from the API
+  const existingDescription: CartDescription[] =
+    await fetchCartItemsAddonsApi();
+
+  // Add the new address to the current addresses
+  const updateCartDescription = [...existingDescription, cartDescription];
+
+  await api.put(
+    `${base_url}/cart`,
+    { cartDescription },
+    { withCredentials: true }
+  );
+
+  return updateCartDescription;
+};
+
 // Worker Saga: Fetch Cart
 function* fetchCartSaga() {
   try {
     yield put(fetchCartStart());
     const cartData: Cart[] = yield call(fetchCartItemsApi);
     yield put(fetchCartSuccess(cartData));
-  } catch(err) {
-    console.log('err>>>>',err)
-    yield put(fetchCartFailure('failed'));
+  } catch (err) {
+    console.log("err>>>>", err);
+    yield put(fetchCartFailure("failed"));
+  }
+}
+
+function* fetchCartDescriptionSaga() {
+  try {
+    yield put(fetchCartDescriptionStart());
+    const cartData: CartDescription[] = yield call(fetchCartItemsAddonsApi);
+    yield put(fetchCartDescriptionSuccess(cartData));
+  } catch (err) {
+    console.log("err>>>>", err);
+    yield put(fetchCartDescriptionFailure("failed"));
   }
 }
 
@@ -47,14 +91,31 @@ function* updateCartSaga() {
   try {
     yield put(updateCartStart()); // Start loading
     const cart: Cart[] = yield select((state: RootState) => state.cart.cart);
-    console.log('Step 1>><<<<',cart)
-
-
-   
     // Call API to update car
     const response: Cart[] = yield call(updateCartItemsApi, cart);
-    console.log('response>>>>',response)
     yield put(updateCartSuccess(response)); // Dispatch success action
+  } catch (error: unknown) {
+    let errorMessage = "An unknown error occurred";
+    if (error && (error as ErrorType).message) {
+      errorMessage = (error as ErrorType).message; // Extract message from the error
+    }
+    yield put(updateCartFailure(errorMessage)); // Handle failure
+  }
+}
+
+function* updateCartDescriptionSaga() {
+  try {
+    yield put(updateCartStart()); // Start loading
+    const cartDescription: CartDescription = yield select(
+      (state: RootState) => state.cart.cartDescription
+    );
+    // Call API to update car
+    const response: CartDescription[] = yield call(
+      updateCartDescriptionApi,
+      cartDescription
+    );
+    yield call(updateCartDescriptionSuccess, response);
+    // yield put(updateCartDescriptionSuccess(cartDescription)); // Dispatch success action
   } catch (error: unknown) {
     let errorMessage = "An unknown error occurred";
     if (error && (error as ErrorType).message) {
@@ -67,5 +128,7 @@ function* updateCartSaga() {
 // Watcher Saga
 export function* watchCartActions() {
   yield takeLatest("cart/fetchCartSaga", fetchCartSaga);
+  yield takeLatest("cart/fetchCartDescriptionSaga", fetchCartDescriptionSaga);
   yield takeLatest("cart/updateCartItem", updateCartSaga);
+  yield takeLatest("cart/updateCartDescriptionItem", updateCartDescriptionSaga);
 }

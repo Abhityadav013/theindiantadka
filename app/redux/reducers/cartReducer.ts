@@ -1,8 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Cart } from "@/app/utils/types/cart_type";
+import { Cart, CartDescription } from "@/app/utils/types/cart_type";
 
 interface CartState  {
   cart: Cart[];
+  cartDescription:CartDescription | null;
+  cartDescriptions:CartDescription[]
   cartTotal: number;
   loading: boolean;
   error: string | null;
@@ -10,6 +12,8 @@ interface CartState  {
 
 const initialState: CartState = {
   cart: [],
+  cartDescription:null,
+  cartDescriptions:[],
   cartTotal: 0,
   loading: false,
   error: null,
@@ -31,6 +35,18 @@ const cartSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
+    fetchCartDescriptionStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchCartDescriptionSuccess: (state, action: PayloadAction<CartDescription[]>) => {
+      state.cartDescriptions = action.payload;
+      state.loading = false;
+    },
+    fetchCartDescriptionFailure: (state, action: PayloadAction<string>) => {
+      state.error = action.payload;
+      state.loading = false;
+    },
     updateCartStart: (state) => {
       state.loading = true;
     },
@@ -46,6 +62,14 @@ const cartSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
+    updateCartDescriptionItem: (state, action: PayloadAction<CartDescription>) => {
+      state.loading = true;
+      state.cartDescription = action.payload ;
+    },
+    updateCartDescriptionSuccess: (state, action: PayloadAction<CartDescription[]>) => {
+      state.cartDescriptions = action.payload ;
+      state.loading = false;
+    },
   },
 });
 
@@ -53,10 +77,15 @@ export const {
   fetchCartStart,
   fetchCartSuccess,
   fetchCartFailure,
+  fetchCartDescriptionStart,
+  fetchCartDescriptionSuccess,
+  fetchCartDescriptionFailure,
   updateCartStart,
   updateCartItem,
   updateCartSuccess,
   updateCartFailure,
+  updateCartDescriptionItem,
+  updateCartDescriptionSuccess
 } = cartSlice.actions;
 
 export default cartSlice.reducer;
