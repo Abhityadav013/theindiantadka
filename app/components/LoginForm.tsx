@@ -1,6 +1,6 @@
 "use client"; // Client component directive
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Drawer,
     Button,
@@ -8,19 +8,23 @@ import {
     Typography,
     Divider,
     IconButton,
+    FormHelperText,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close"; // Import close icon
 import { GoogleLogin } from "@react-oauth/google"; // Google login import
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import { ErrorResponse } from "./Navbar";
 
 // Define types for the props of the LoginForm component
 interface LoginFormProps {
     onLogin: (values: LoginInput) => void;
     onSignIn: (values: SignInInput) => void;
-    onGoogleLogin: (credential?: string) => void; // GoogleLogin's response is the credential string
+    onGoogleLogin: (credential: string) => void; // GoogleLogin's response is the credential string
     isOpen: boolean;
     onClose: () => void; // onClose function to close the drawer
+    error: ErrorResponse | null;
+    setFormError: (values: ErrorResponse) => void
 }
 
 export interface LoginInput {
@@ -29,11 +33,11 @@ export interface LoginInput {
 }
 
 export interface SignInInput {
-    name:string;
+    name: string;
     email: string;
-    phoneNumber:string;
+    phoneNumber: string;
     password: string;
-    confirmPassword:string
+    confirmPassword: string;
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({
@@ -42,6 +46,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
     onGoogleLogin,
     isOpen,
     onClose,
+    error,
+    setFormError
 }) => {
     const [isLoading, setIsLoading] = useState(false); // For handling loading state during form submission
     const [isLogin, setIsLogin] = useState(true); // To toggle between Login and Sign Up
@@ -51,20 +57,39 @@ const LoginForm: React.FC<LoginFormProps> = ({
     const [phoneNumber, setPhoneNumber] = useState(""); // Phone number for sign-up
     const [confirmPassword, setConfirmPassword] = useState(""); // Confirm password for sign-up
 
+    useEffect(() => {
+        if (error?.length) {
+            setIsLoading(false)
+        }
+    }, [error])
+
+    useEffect(() => {
+        if (isLogin) {
+            setName("");
+            setPhoneNumber("");
+            setPassword("");
+            setConfirmPassword("");
+        }
+    }, [isLogin]);  // This effect will run when `isLogin` state changes
+    
+
     // Handle form submission
     const handleSubmit = async () => {
         setIsLoading(true);
         try {
-            if(isLogin){
+            if (isLogin) {
                 await onLogin({ email, password }); // Call the passed function for form submission
-            }else{
-                await onSignIn({ name, email,phoneNumber, password,confirmPassword  }); // Call the passed function for form submission
+            } else {
+                const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+                await onSignIn({ name, email, phoneNumber: formattedPhoneNumber, password, confirmPassword }); // Call the passed function for form submission
             }
-           
-        } catch (error) {
-            console.error("Login failed:", error);
-        }
-        setIsLoading(false);
+        } catch (err) {
+            console.error("Login failed:", err);
+        };
+    }
+
+    const getErrorMessage = (key: string) => {
+        return error?.find((err) => err.key === key)?.message || null;
     };
 
     return (
@@ -125,45 +150,52 @@ const LoginForm: React.FC<LoginFormProps> = ({
                         onChange={(e) => setEmail(e.target.value)}
                         className="mb-4"
                         required
+                        error={!!getErrorMessage("email")}
+                        helperText={getErrorMessage("email")} // Show error for email
                     />
 
                     {!isLogin && (
-                        <PhoneInput
-                            country={"de"} // Default country set to Germany
-                            value={phoneNumber}
-                            onChange={setPhoneNumber}
-                            preferredCountries={["de"]} // Always show Germany at the top
-                            enableSearch={true} // Allow searching for country codes
-                            disableSearchIcon={false} // Show a search icon
-                            autoFormat={true} // Auto-format the input for better UX
-                            priority={{ de: 1 }} // Ensures 'DE' stays at the top of the list when opening
-                            inputStyle={{
-                                width: "100%",
-                                height: "56px",
-                                fontSize: "16px",
-                                paddingLeft: "50px", // Adjust space for flag & country code
-                                // borderRadius: "0px",
-                            }}
-                            containerStyle={{
-                                width: "100%",
-                                marginBottom: "16px",
-                            }}
-                            buttonStyle={{
-                                background: "transparent",
-                            }}
-                            dropdownStyle={{
-                                maxHeight: "250px", // Limit height to prevent excessive scrolling
-                                overflowY: "auto", // Enable scrolling
-                                zIndex: 1000, // Ensure it's above other elements
-                            }}
-                            searchStyle={{
-                                width: "90%",
-                                margin: "10px auto",
-                                padding: "8px",
-                                fontSize: "14px",
-                                borderRadius: "6px",
-                            }}
-                        />
+                        <div className="mb-4">
+                            <PhoneInput
+                                country={"de"} // Default country set to Germany
+                                value={phoneNumber}
+                                onChange={setPhoneNumber}
+                                preferredCountries={["de"]} // Always show Germany at the top
+                                enableSearch={true} // Allow searching for country codes
+                                disableSearchIcon={false} // Show a search icon
+                                autoFormat={true} // Auto-format the input for better UX
+                                priority={{ de: 1 }} // Ensures 'DE' stays at the top of the list when opening
+                                inputStyle={{
+                                    width: "100%",
+                                    height: "56px",
+                                    fontSize: "16px",
+                                    paddingLeft: "50px", // Adjust space for flag & country code
+                                }}
+                                containerStyle={{
+                                    width: "100%",
+                                }}
+                                buttonStyle={{
+                                    background: "transparent",
+                                }}
+                                dropdownStyle={{
+                                    maxHeight: "250px", // Limit height to prevent excessive scrolling
+                                    overflowY: "auto", // Enable scrolling
+                                    zIndex: 1000, // Ensure it's above other elements
+                                }}
+                                searchStyle={{
+                                    width: "90%",
+                                    margin: "10px auto",
+                                    padding: "8px",
+                                    fontSize: "14px",
+                                    borderRadius: "6px",
+                                }}
+                            />
+                            {getErrorMessage('phoneNumber') && (
+                                <FormHelperText error>
+                                    {getErrorMessage("phoneNumber")}
+                                </FormHelperText>
+                            )}
+                        </div>
                     )}
 
                     <TextField
@@ -175,6 +207,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
                         onChange={(e) => setPassword(e.target.value)}
                         className="mb-4"
                         required
+                        error={!!getErrorMessage("password")}
+                        helperText={getErrorMessage("password")} // Show error for password
                     />
 
                     {!isLogin && (
@@ -187,6 +221,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             className="mb-4"
                             required
+                            error={!!getErrorMessage("confirmPassword")}
+                            helperText={getErrorMessage("confirmPassword")}
                         />
                     )}
                 </div>
@@ -206,7 +242,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
                 <div className="text-center mb-4">
                     <GoogleLogin
-                        onSuccess={({ credential }) => onGoogleLogin(credential)}
+                        onSuccess={({ credential }) => onGoogleLogin(String(credential))}
                         onError={() => alert("Google login failed")}
                     />
                 </div>
@@ -216,14 +252,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
                         {isLogin ? (
                             <>
                                 Don&apos;t have an account?{" "}
-                                <Button onClick={() => setIsLogin(false)} color="primary">
+                                <Button onClick={() => { setIsLogin(false); setFormError([]) }} color="primary">
                                     Sign Up
                                 </Button>
                             </>
                         ) : (
                             <>
                                 Already have an account?{" "}
-                                <Button onClick={() => setIsLogin(true)} color="primary">
+                                <Button onClick={() => { setIsLogin(true); setFormError([]) }} color="primary">
                                     Login
                                 </Button>
                             </>
