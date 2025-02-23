@@ -159,7 +159,6 @@ const NavBar = () => {
     dispatch({ type: "user/fetchProfileOTPSaga" });
   }
   const verifyOTP = () => {
-    console.log('Step 1')
 
   }
 
@@ -207,7 +206,7 @@ const NavBar = () => {
           <UserProfileMenu userData={userDetails} logoutUser={logoutUser} sendOTP={sendOTP} />
         )}
         {
-          isLogin && <LoginForm onLogin={onLogin} onSignIn={onSignIn} onGoogleLogin={onGoogleLogin} isOpen={isLogin} onClose={() => setIsLogin(!isLogin)} error={formError} />
+          isLogin && <LoginForm onLogin={onLogin} onSignIn={onSignIn} onGoogleLogin={onGoogleLogin} isOpen={isLogin} onClose={() => setIsLogin(!isLogin)} error={formError} setFormError={setFormError}/>
         }
 
         {

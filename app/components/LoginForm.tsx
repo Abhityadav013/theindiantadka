@@ -1,6 +1,6 @@
 "use client"; // Client component directive
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Drawer,
     Button,
@@ -24,6 +24,7 @@ interface LoginFormProps {
     isOpen: boolean;
     onClose: () => void; // onClose function to close the drawer
     error: ErrorResponse | null;
+    setFormError: (values: ErrorResponse) => void
 }
 
 export interface LoginInput {
@@ -45,7 +46,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
     onGoogleLogin,
     isOpen,
     onClose,
-    error
+    error,
+    setFormError
 }) => {
     const [isLoading, setIsLoading] = useState(false); // For handling loading state during form submission
     const [isLogin, setIsLogin] = useState(true); // To toggle between Login and Sign Up
@@ -54,6 +56,22 @@ const LoginForm: React.FC<LoginFormProps> = ({
     const [name, setName] = useState(""); // Name for sign-up
     const [phoneNumber, setPhoneNumber] = useState(""); // Phone number for sign-up
     const [confirmPassword, setConfirmPassword] = useState(""); // Confirm password for sign-up
+
+    useEffect(() => {
+        if (error?.length) {
+            setIsLoading(false)
+        }
+    }, [error])
+
+    useEffect(() => {
+        if (isLogin) {
+            setName("");
+            setPhoneNumber("");
+            setPassword("");
+            setConfirmPassword("");
+        }
+    }, [isLogin]);  // This effect will run when `isLogin` state changes
+    
 
     // Handle form submission
     const handleSubmit = async () => {
@@ -65,8 +83,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
                 await onSignIn({ name, email, phoneNumber: formattedPhoneNumber, password, confirmPassword }); // Call the passed function for form submission
             }
-        } catch (error) {
-            console.error("Login failed:", error);
+        } catch (err) {
+            console.error("Login failed:", err);
         };
     }
 
@@ -234,14 +252,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
                         {isLogin ? (
                             <>
                                 Don&apos;t have an account?{" "}
-                                <Button onClick={() => setIsLogin(false)} color="primary">
+                                <Button onClick={() => { setIsLogin(false); setFormError([]) }} color="primary">
                                     Sign Up
                                 </Button>
                             </>
                         ) : (
                             <>
                                 Already have an account?{" "}
-                                <Button onClick={() => setIsLogin(true)} color="primary">
+                                <Button onClick={() => { setIsLogin(true); setFormError([]) }} color="primary">
                                     Login
                                 </Button>
                             </>
