@@ -31,7 +31,7 @@ export default function RootLayout({
         <body className={`${outfit.variable} app`}> {/* Apply Outfit font */}
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <GoogleOAuthProvider clientId="534846475345-c8ujfd7kormp4abkev4skgkl8s9urh3g.apps.googleusercontent.com">
+            <GoogleOAuthProvider clientId={String(process.env.GOOGLE_CLIENT_ID)}>
             <NavBarWrapper />
             {children}
             </GoogleOAuthProvider>
