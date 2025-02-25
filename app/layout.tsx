@@ -3,10 +3,10 @@ import { Outfit } from "next/font/google"; // Import Outfit font
 import "./globals.css"; // Import global styles
 import { StoreProvider } from "./redux/StoreProvider";
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import theme from "./theme";
-import NavBarWrapper from "./components/NavBarWrapper";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-
+import MobileViewDetector from "./components/MobileViewDetector";
+import theme from "./theme";
+import LoginDrawer from "./components/LoginDrawer";
 
 // Configure the Outfit font
 const outfit = Outfit({
@@ -25,21 +25,22 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <StoreProvider>
-      <html lang="en">
-        <body className={`${outfit.variable} app`}> {/* Apply Outfit font */}
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
-             <GoogleOAuthProvider clientId={String(process.env.GOOGLE_CLIENT_ID)}>
-            <NavBarWrapper />
-            {children}
-            </GoogleOAuthProvider>
-          </ThemeProvider>
-         
-        </body>
-      </html>
+      <GoogleOAuthProvider clientId={String(process.env.GOOGLE_CLIENT_ID)}>
+        <html lang="en">
+          <body className={`${outfit.variable} app`}> {/* Apply Outfit font */}
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <MobileViewDetector />
+              <LoginDrawer />
+            {/* Include MobileViewDetector */}
+              {children}
+            </ThemeProvider>
+          </body>
+        </html>
+      </GoogleOAuthProvider>
     </StoreProvider>
-
   );
 }

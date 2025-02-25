@@ -8,14 +8,13 @@ const NavBarWrapper = () => {
 
     return (
         <Box className="py-5 flex justify-between items-center">
-            {/* Logo */}
             <Link href="/">
                 <Image
                     src="https://testing.indiantadka.eu/logo.jpg"
                     alt="Logo"
                     width={80}
                     height={18}
-                    className="dark:invert w-[150px] md:w-[140px] sm:w-[120px]"
+                    className="w-[150px] md:w-[140px] sm:w-[120px]"
                 />
             </Link>
             <NavBar/>
