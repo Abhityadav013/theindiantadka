@@ -1,12 +1,11 @@
 // store/types.ts
 export interface UserLocation {
-    lat: number;
-    lng: number;
-  }
-  
-  export interface UserState {
-    userLocation: UserLocation | null;
-    
-    isLoading: boolean;
-  }
-  
+  lat: number;
+  lng: number;
+}
+
+export interface UserState {
+  userLocation: UserLocation | null;
+
+  isLoading: boolean;
+}

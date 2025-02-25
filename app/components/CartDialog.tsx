@@ -8,7 +8,7 @@ interface CartCustomizeProps {
     isOpen: boolean;
     onClose: () => void;
     foodData: foodData;
-    cartDescription:string
+    cartDescription: string
     onSubmit: (value: DescriptionSubmit) => void;
 
 }
@@ -21,14 +21,14 @@ export interface DescriptionSubmit {
     description: CartDescription
 }
 
-const CartDialog: React.FC<CartCustomizeProps> = ({ isOpen, onClose, foodData, onSubmit ,cartDescription}) => {
-    const [description, setDescription] = useState(cartDescription || "");
+const CartDialog: React.FC<CartCustomizeProps> = ({ isOpen, onClose, foodData, onSubmit, cartDescription }) => {
+    const [description, setDescription] = useState<string | null>(cartDescription || "");
 
     const submitDescription = () => {
         onSubmit({
             description: {
                 itemId: foodData.itemId,
-                description: description
+                description: description || ''
             }
         })
     }
@@ -54,7 +54,7 @@ const CartDialog: React.FC<CartCustomizeProps> = ({ isOpen, onClose, foodData, o
                     minRows={4}
                     placeholder="Write additional instructions here..."
                     className="w-full border rounded-md p-2 text-sm"
-                    value={description}
+                    value={description||''}
                     onChange={(e) => setDescription(e.target.value)}
                 />
             </DialogContent>

@@ -102,7 +102,7 @@ const CartHistory = () => {
                                     <Typography variant="caption" className="text-blue-500 cursor-pointer" onClick={() => setCustomizeModal(true)}>Customize</Typography>
                                     {
                                         isCustomizeModal && (
-                                            <CartDialog isOpen={isCustomizeModal} onClose={handleCustomizeModal} foodData={{ itemId: item.id, itemName: item.itemName }} onSubmit={handleItemDescription} cartDescription={String(cartDescription?.description)} />
+                                            <CartDialog isOpen={isCustomizeModal} onClose={handleCustomizeModal} foodData={{ itemId: item.id, itemName: item.itemName }} onSubmit={handleItemDescription} cartDescription={String(cartDescription?.description ||'')} />
                                         )
                                     }
                                 </div>

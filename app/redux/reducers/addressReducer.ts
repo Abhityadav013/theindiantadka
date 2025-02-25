@@ -4,7 +4,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 interface AddressState {
   addressModel: boolean;
   address: Address;
-  userAddress:  UserAddress[] | null;
+  userAddress:  UserAddress[];
   newAddress:UserAddress | null;
   loading: boolean;
   error: string | null;

@@ -1,17 +1,22 @@
 import { UserProfile } from "@/app/utils/types/user_details";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 interface UserState {
-  profile: UserProfile | null;
+  profile: UserProfile;
   otpExpireAt: number;
   otpModal: boolean;
+  loginModal: boolean;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: UserState = {
-  profile: null,
+  profile: {
+    name: "",
+    isAccountVerified: false,
+  },
   otpExpireAt: 0,
   otpModal: false,
+  loginModal: false,
   loading: false,
   error: null,
 };
@@ -44,6 +49,9 @@ const userSlice = createSlice({
       state.loading = true;
       state.otpModal = false;
     },
+    setLoginModal: (state, action: PayloadAction<boolean>) => {
+      state.loginModal = action.payload;
+    },
   },
 });
 
@@ -54,5 +62,6 @@ export const {
   fetchOTPSuccess,
   openOTPModel,
   closeOTPModel,
+  setLoginModal
 } = userSlice.actions;
 export default userSlice.reducer;

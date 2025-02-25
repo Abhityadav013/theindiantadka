@@ -4,6 +4,7 @@ import FoodDisplayWrapper from "./components/FoodDisplayWrapper";
 import { menu_url } from "./utils/api_url";
 import { FilteredMenuItem, FoodItem } from "./utils/types/menu_type";
 import { FoodCategory } from "./utils/types/food_category_type";
+import NavBarWrapper from "./components/NavBarWrapper";
 
 // ✅ Fetch menu data only once per hour (ISR equivalent)
 async function getMenuData() {
@@ -13,9 +14,13 @@ async function getMenuData() {
       fetch(`${menu_url}/category`, { next: { revalidate: 3600 } }),
     ]);
 
+    if (!menuResponse.ok || !categoryResponse.ok) {
+      throw new Error("Failed to fetch data");
+    }
+
     const foodMenuItems: FoodItem[] = await menuResponse.json();
     const foodCategoryItems: FoodCategory[] = await categoryResponse.json();
-    const filteredMenuItem: FoodItem[] = foodMenuItems.filter((cat) => cat.isDelivery)
+    const filteredMenuItem: FoodItem[] = foodMenuItems.filter((cat) => cat.isDelivery);
     const filteredMenuCategoryItems: FilteredMenuItem[] = foodCategoryItems
       .filter((cat) => cat.isDelivery)
       .map((cat) => ({
@@ -35,10 +40,10 @@ export default async function Home() {
 
   return (
     <>
+      <NavBarWrapper />
       <Header />
       <ExploreMenuWrapper menu_list={filteredMenuCategoryItems} />
       <FoodDisplayWrapper food_list={filteredMenuItem} />
     </>
-
   );
 }
