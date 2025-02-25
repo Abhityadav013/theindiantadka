@@ -15,7 +15,7 @@ import { Cart } from '../utils/types/cart_type';
 const LoginDrawer = () => {
   const [userDetails, setUserDetails] = React.useState<UserProfile | null>(null);
   const [isLoading, setLoading] = React.useState(true);
-  const [formError, setFormError] = React.useState<ErrorResponse[]>([]);
+  const [formError, setFormError] = React.useState<ErrorResponse>([]);
   const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
   const { loginModal } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch<AppDispatch>();
