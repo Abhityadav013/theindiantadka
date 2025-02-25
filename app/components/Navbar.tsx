@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle"; // Profile icon import
 import { useDispatch, useSelector } from "react-redux";
@@ -10,7 +10,7 @@ import { Cart } from "../utils/types/cart_type";
 import { base_url } from "../utils/api_url";
 import api from "../utils/axiosInstance";
 import { UserProfile } from "../utils/types/user_details";
-import {  setLoginModal } from "../redux/reducers/userProfileReducer";
+import { fetchUserSuccess, setLoginModal } from "../redux/reducers/userProfileReducer";
 import UserProfileMenu from "./UserProfile";
 import OTPComponent from "./OTPComponent";
 
@@ -28,9 +28,48 @@ const NavBar = () => {
   const [userDetails, setUserDetails] = useState<UserProfile | null>(null);
   const [isLoading, setLoading] = useState(true)
   const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
-  const { otpModal, otpExpireAt,profile } = useSelector((state: RootState) => state.user);
+  const { otpModal, otpExpireAt } = useSelector((state: RootState) => state.user);
   const isMobileView = useSelector((state: RootState) => state.mobile.isMobile);
   const dispatch = useDispatch();
+
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await api.get(`${base_url}/profile`, {
+        withCredentials: true,
+      });
+      if (response.data.statusCode === 200) {
+        setUserDetails(response.data.data.userDetails);
+        dispatch(fetchUserSuccess(response.data.data.userDetails))
+      }
+    }
+    finally {
+      setLoading(false); // Set loading to false after fetching completes
+    }
+  }, [dispatch]);
+
+  useEffect(() => {
+    const isUserLoggedIn = localStorage.getItem("_is_user_logged_in");
+    if (!userDetails && isUserLoggedIn) {
+      fetchUser();
+      dispatch({ type: "address/fetchUserAddressSaga" })
+    } else {
+      setLoading(false)
+    }
+  }, [fetchUser, dispatch, userDetails])
+
+  useEffect(() => {
+    dispatch({ type: "user/fetchUserLocation" });
+    dispatch({ type: "menu/fetchMenuSaga" });
+    dispatch({ type: "cart/fetchCartSaga" });
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (cart.length > 0) {
+      dispatch({ type: "cart/fetchCartDescriptionSaga" })
+    }
+
+  }, [dispatch, cart])
+
 
   const logoutUser = async () => {
     try {
@@ -46,13 +85,6 @@ const NavBar = () => {
       console.error("Error logging out:", err);
     }
   };
-
-  useEffect(() => {
-    if(profile){
-    setLoading(false);
-    setUserDetails(profile);
-    }
-  }, [profile, dispatch, userDetails]);
 
   const sendOTP = () => {
     dispatch({ type: "user/fetchProfileOTPSaga" });
