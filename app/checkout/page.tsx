@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import LoginSection from '../components/MobileLogin/LoginSection';
 import { Cart } from '../utils/types/cart_type';
 import { useSelector } from 'react-redux';
@@ -13,11 +13,28 @@ import TipOptions from '../components/MobileView/TipOptions';
 import BillDetails from '../components/MobileView/BillDetails';
 import ReviewOrderSection from '../components/MobileView/ReviewOrderSection';
 import PaymentCheckout from '../components/MobileView/PaymentCheckout';
-
+import Loader from '../components/Loader';
 
 const Checkout = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
   const { profile, loginModal } = useSelector((state: RootState) => state.user);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000); // Wait for 2 seconds before rendering
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <Loader loadingImage={'https://testing.indiantadka.eu/assets/cart-item-loader.gif'} isLoading={isLoading} />
+      </Box>
+    );
+  }
 
   if (cart.length === 0) {
     return <FakeSection />;
