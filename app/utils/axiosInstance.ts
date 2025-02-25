@@ -2,8 +2,8 @@ import axios from "axios";
 import { base_url } from "./api_url";
 
 const api = axios.create({
-  baseURL: base_url,
-  withCredentials: true, // Ensure cookies are sent with requests
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  withCredentials: true, // Ensure credentials are included in all requests
 });
 
 // Request Interceptor (Optional: If you need to modify headers)
