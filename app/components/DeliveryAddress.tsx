@@ -77,7 +77,7 @@ const AddressSelection = () => {
 
   return (
     <div className="p-6 bg-white">
-    <AddNewAddress onSubmit={onSubmit} isOpen={isAddressModelOpen} onClose={closeAddressDrawer} address={address} />
+    <AddNewAddress onSubmit={onSubmit} isOpen={isAddressModelOpen} onClose={closeAddressDrawer} address={address} isMobile={false} />
     <CheckoutSteps />
     {
         (userAddress.length > 0 || userAddress.some((address) => address.addressType === 'home')) && !isDeliveryAddressModal && false

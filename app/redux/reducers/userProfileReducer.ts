@@ -1,7 +1,7 @@
 import { UserProfile } from "@/app/utils/types/user_details";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 interface UserState {
-  profile: UserProfile;
+  profile: UserProfile
   otpExpireAt: number;
   otpModal: boolean;
   loginModal: boolean;

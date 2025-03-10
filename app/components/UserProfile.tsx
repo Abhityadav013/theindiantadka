@@ -6,7 +6,7 @@ import { UserProfile } from "../utils/types/user_details";
 interface ProfileFormProps {
   logoutUser: () => void;
   sendOTP: () => void;
-  userData: UserProfile;
+  userData: UserProfile | null;
 }
 
 const UserProfileMenu: React.FC<ProfileFormProps> = ({ userData, logoutUser, sendOTP }) => {

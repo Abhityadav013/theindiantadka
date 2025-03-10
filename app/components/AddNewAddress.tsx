@@ -11,7 +11,8 @@ interface AddressFormProps {
     onSubmit: (values: AddressInput) => void;
     isOpen: boolean;
     onClose: () => void; // onClose function to close the drawer
-    address: Address
+    address: Address,
+    isMobile:boolean
 }
 
 export interface AddressInput {
@@ -20,6 +21,7 @@ export interface AddressInput {
     street: string;
     pincode: string;
     addressType: string
+    
 }
 
 
@@ -27,8 +29,10 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
     onSubmit,
     isOpen,
     onClose,
-    address
+    address,
+    isMobile
 }
+
 ) => {
     const [flatNumber, setFlatNumber] = React.useState("");
     const [buildingNumber, setBuildingNumber] = React.useState("");
@@ -53,7 +57,7 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
     };
     return (
         <Drawer
-            anchor="left"
+            anchor="bottom"
             open={isOpen}
             onClose={onClose}
             sx={{
@@ -61,10 +65,12 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
                     width: "100%",
                     maxWidth: "500px",
                     height: "100%",
+                    padding: isMobile ? "16px" : "32px", // Adjust padding based on screen size
+                    // borderRadius: isMobile ? "20px" : "30px", // Add rounded corners on mobile
                 },
             }}
         >
-            <div className="w-full p-6 rounded-t-xl relative">
+            <div className="w-full p-6 relative">
                 {/* Close button */}
                 <IconButton
                     edge="start"
@@ -77,10 +83,12 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
 
                 <div className="text-center mb-6">
                     <Typography variant="h5" className="text-xl text-black font-semibold">
-                        Save delivery address
+                        Save Delivery Address
                     </Typography>
                 </div>
-                <div className='pl-[160px] pr-[20px]'>
+
+                {/* Input fields */}
+                <div className={isMobile ? 'pl-4 pr-4' : 'pl-12 pr-12'}>
                     <TextField
                         label="Flat No."
                         variant="outlined"
@@ -100,7 +108,7 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
                         required
                     />
                     <TextField
-                        label="street"
+                        label="Street"
                         variant="outlined"
                         fullWidth
                         value={street}
@@ -109,7 +117,7 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
                         required
                     />
                     <TextField
-                        label="pincode"
+                        label="Pincode"
                         variant="outlined"
                         fullWidth
                         value={pincode}
@@ -118,7 +126,8 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
                         required
                     />
 
-                    <div className="flex border-0 mb-4">
+                    {/* Address Type Chips */}
+                    <div className="flex flex-wrap gap-2 mb-4">
                         <Chip
                             icon={<HomeIcon />}
                             label="Home"
@@ -126,10 +135,6 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
                             color={addressType === "home" ? "primary" : "default"}
                             onClick={() => setAddressType("home")}
                             variant={addressType === "home" ? "filled" : "outlined"}
-                            style={{
-                                borderRadius: 0, // Square edges
-                                marginRight: 0, // No space between chips
-                            }}
                         />
                         <Chip
                             icon={<WorkIcon />}
@@ -138,10 +143,6 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
                             color={addressType === "work" ? "primary" : "default"}
                             onClick={() => setAddressType("work")}
                             variant={addressType === "work" ? "filled" : "outlined"}
-                            style={{
-                                borderRadius: 0, // Square edges
-                                marginRight: 0, // No space between chips
-                            }}
                         />
                         <Chip
                             icon={<NotListedLocationIcon />}
@@ -150,29 +151,25 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
                             color={addressType === "other" ? "primary" : "default"}
                             onClick={() => setAddressType("other")}
                             variant={addressType === "other" ? "filled" : "outlined"}
-                            style={{
-                                borderRadius: 0, // Square edges
-                                marginRight: 0, // No space between chips
-                            }}
                         />
                     </div>
+
+                    {/* Submit Button */}
                     <Button
                         variant="contained"
                         color="primary"
                         fullWidth
                         onClick={handleSubmit}
-                        className="mb-4 bg-tomato"
                         sx={{
-                            height: '46px', // Set the height of the button to match the TextField height
+                            height: '46px',
                         }}
                     >
                         SAVE ADDRESS & PROCEED
                     </Button>
-
                 </div>
             </div>
         </Drawer>
-    )
+    );
 }
 
 export default AddNewAddress
