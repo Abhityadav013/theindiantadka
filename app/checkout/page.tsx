@@ -14,11 +14,16 @@ import BillDetails from '../components/MobileView/BillDetails';
 import ReviewOrderSection from '../components/MobileView/ReviewOrderSection';
 import PaymentCheckout from '../components/MobileView/PaymentCheckout';
 import Loader from '../components/Loader';
+import AddAddressSection from '../components/MobileView/AddAddress';
+import AddressSection from '../components/MobileView/AddressSection';
 
 const Checkout = () => {
   const [isLoading, setIsLoading] = useState(true);
   const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
   const { profile, loginModal } = useSelector((state: RootState) => state.user);
+  const { userAddress } = useSelector((state: RootState) => state.address);
+
+
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -31,7 +36,7 @@ const Checkout = () => {
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          <Loader loadingImage={'https://testing.indiantadka.eu/assets/cart-item-loader.gif'} isLoading={isLoading} />
+        <Loader loadingImage={'https://testing.indiantadka.eu/assets/cart-item-loader.gif'} isLoading={isLoading} />
       </Box>
     );
   }
@@ -61,8 +66,23 @@ const Checkout = () => {
         <Box>
           <ReviewOrderSection />
         </Box>
+        {/* <Box>
+          <AddressSection />
+        </Box> */}
         {
-          profile.name !== '' ? <PaymentCheckout /> : <LoginSection />
+          profile.name !== '' ? (
+            <Box>
+              {
+                userAddress?.length === 0 ? <AddAddressSection />
+                  : (
+                    <>
+                      <AddressSection userAddress={userAddress}/>
+                      <PaymentCheckout />
+                    </>
+                  )
+              }
+            </Box>
+          ) : <LoginSection />
         }
         {loginModal && <LoginSection />} {/* Conditionally render LoginDrawer */}
       </Box>

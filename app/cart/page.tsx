@@ -8,9 +8,12 @@ import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers";
 import EmptyCart from "../components/EmptyCart";
 import Loader from "../components/Loader";
+import { useRouter } from "next/navigation";
 
 const CartItem = () => {
+  const router = useRouter();
   const { cart: cartItems } = useSelector((state: RootState) => state.cart);
+    const isMobileView = useSelector((state: RootState) => state.mobile.isMobile);
   const [isLoading, setIsLoading] = React.useState(true);
 
   useEffect(() => {
@@ -25,6 +28,12 @@ const CartItem = () => {
       }, 500); // 5000 ms = 5 seconds
     }
   }, [cartItems]);
+
+  useEffect(() => {
+    if (isMobileView) {
+      router.push("/checkout"); // Redirect to the checkout page
+    }
+  }, [isMobileView, router]);
   
   return isLoading ? (
     <Loader loadingImage={'https://testing.indiantadka.eu/assets/cart-item-loader.gif'} isLoading={isLoading} />

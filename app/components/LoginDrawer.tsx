@@ -35,7 +35,7 @@ const LoginDrawer = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    const isUserLoggedIn = localStorage.getItem("_is_user_logged_in");
+    const isUserLoggedIn = localStorage.getItem("_is_user_logged_in") === "true";  
     if (!userDetails && isUserLoggedIn) {
       fetchUser();
       dispatch({ type: "address/fetchUserAddressSaga" });
@@ -43,6 +43,7 @@ const LoginDrawer = () => {
       setLoading(false);
     }
   }, [fetchUser, dispatch, userDetails]);
+  
 
   useEffect(() => {
     dispatch({ type: "user/fetchUserLocation" });
