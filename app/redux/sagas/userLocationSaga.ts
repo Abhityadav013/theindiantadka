@@ -76,6 +76,7 @@ function* fetchUserLocationSaga(): Generator<
         }
 
         sessionStorage.setItem('tid', response.tid);
+        sessionStorage.setItem('ssid',response.deviceId)
 
         // ✅ Store location in localStorage only if consent is given
         if (locationConsent && userLocation) {
