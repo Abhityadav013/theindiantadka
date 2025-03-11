@@ -45,7 +45,7 @@ const Checkout = () => {
     return <FakeSection />;
   } else {
     return (
-      <Box sx={{ paddingBottom: '140px' }}> {/* Add padding to the bottom */}
+      <Box sx={{ paddingBottom: loginModal ?  '140px' :'10px' }}> {/* Add padding to the bottom */}
         <CartSection />
         <Box className="mt-20"> {/* Add margin to ensure CartItem is below CartSection */}
           <CartItem />
