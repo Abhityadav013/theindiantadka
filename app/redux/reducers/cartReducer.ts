@@ -1,10 +1,10 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Cart, CartDescription } from "@/app/utils/types/cart_type";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Cart, CartDescription } from '@/app/utils/types/cart_type';
 
-interface CartState  {
+interface CartState {
   cart: Cart[];
-  cartDescription:CartDescription | null;
-  cartDescriptions:CartDescription[]
+  cartDescription: CartDescription | null;
+  cartDescriptions: CartDescription[];
   cartTotal: number;
   loading: boolean;
   error: string | null;
@@ -12,17 +12,25 @@ interface CartState  {
 
 const initialState: CartState = {
   cart: [],
-  cartDescription:null,
-  cartDescriptions:[],
+  cartDescription: null,
+  cartDescriptions: [],
   cartTotal: 0,
   loading: false,
   error: null,
 };
 
 const cartSlice = createSlice({
-  name: "cart",
+  name: 'cart',
   initialState,
   reducers: {
+    fetchCartTotalStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchCartTotal: (state, action: PayloadAction<number>) => {
+      state.cartTotal = action.payload;
+      state.loading = false;
+    },
     fetchCartStart: (state) => {
       state.loading = true;
       state.error = null;
@@ -39,7 +47,10 @@ const cartSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
-    fetchCartDescriptionSuccess: (state, action: PayloadAction<CartDescription[]>) => {
+    fetchCartDescriptionSuccess: (
+      state,
+      action: PayloadAction<CartDescription[]>,
+    ) => {
       state.cartDescriptions = action.payload;
       state.loading = false;
     },
@@ -62,18 +73,26 @@ const cartSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
-    updateCartDescriptionItem: (state, action: PayloadAction<CartDescription>) => {
+    updateCartDescriptionItem: (
+      state,
+      action: PayloadAction<CartDescription>,
+    ) => {
       state.loading = true;
-      state.cartDescription = action.payload ;
+      state.cartDescription = action.payload;
     },
-    updateCartDescriptionSuccess: (state, action: PayloadAction<CartDescription[]>) => {
-      state.cartDescriptions = action.payload ;
+    updateCartDescriptionSuccess: (
+      state,
+      action: PayloadAction<CartDescription[]>,
+    ) => {
+      state.cartDescriptions = action.payload;
       state.loading = false;
     },
   },
 });
 
 export const {
+  fetchCartTotalStart,
+  fetchCartTotal,
   fetchCartStart,
   fetchCartSuccess,
   fetchCartFailure,
@@ -85,7 +104,7 @@ export const {
   updateCartSuccess,
   updateCartFailure,
   updateCartDescriptionItem,
-  updateCartDescriptionSuccess
+  updateCartDescriptionSuccess,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

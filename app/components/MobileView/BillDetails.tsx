@@ -1,10 +1,13 @@
 'useClient';
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { Box, Typography, Divider } from "@mui/material";
 import { FoodItem } from '@/app/utils/types/menu_type';
 import { RootState } from '@/app/redux/reducers';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '@/app/redux/store';
+import { fetchCartTotal } from '@/app/redux/reducers/cartReducer';
 const BillDetails = () => {
+    const dispatch = useDispatch<AppDispatch>();
     const { cart } = useSelector((state: RootState) => state.cart);
     const foodItems: FoodItem[] = useSelector((state: RootState) => state.menu.foodMenuItems);
 
@@ -15,6 +18,11 @@ const BillDetails = () => {
             return foodItemMatch ? total + foodItemMatch.price * cartItem.quantity : total;
         }, 0);
     }, [cart, foodItems]);
+    useEffect(() => {
+        if (cartTotal) {
+            dispatch(fetchCartTotal(cartTotal))
+        }
+    }, [dispatch, cartTotal])
 
     return (
         <Box className="mt-4 p-4 border rounded-lg bg-white shadow-md">

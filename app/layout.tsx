@@ -7,6 +7,8 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import MobileViewDetector from "./components/MobileViewDetector";
 import theme from "./theme";
 import LoginDrawer from "./components/LoginDrawer";
+import CookieConsentPopup from "./components/CookiesConset";
+
 
 // Configure the Outfit font
 const outfit = Outfit({
@@ -33,6 +35,7 @@ export default function RootLayout({
           <body className={`${outfit.variable} app`}> {/* Apply Outfit font */}
             <ThemeProvider theme={theme}>
               <CssBaseline />
+              <CookieConsentPopup/>
               <MobileViewDetector />
               <LoginDrawer />
             {/* Include MobileViewDetector */}
