@@ -51,6 +51,8 @@ const NavBar = () => {
         setUserDetails(null);
         dispatch({ type: "cart/fetchCartSaga" });
         localStorage.removeItem("_is_user_logged_in");
+        sessionStorage.setItem('tid', response.data.tid);
+        sessionStorage.setItem('ssid',response.data.deviceId)
       }
     } catch (err) {
       console.error("Error logging out:", err);
