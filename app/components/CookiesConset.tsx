@@ -13,20 +13,21 @@ const CookieConsentPopup = () => {
     const [cookieConsent, setCookieConsent] = useState(false);
     const [locationConsent, setLocationConsent] = useState(false);
     const isMobileView = useSelector((state: RootState) => state.mobile.isMobile);
-    const onClose = () =>{
-        setOpen(() =>!open)
+    const onClose = () => {
+        setOpen(() => !open)
     }
 
     useEffect(() => {
         const consent = localStorage.getItem("cookieConsent");
         const locationConsent = localStorage.getItem("locationConsent");
+        const userLocation = localStorage.getItem('indian_tadka_userLocation')
         if (!consent) {
             setOpen(true);
         }
-        if(locationConsent){
+        if (locationConsent && !userLocation) {
             dispatch({ type: "user/fetchUserLocation" });
         }
-    }, [dispatch,open]);
+    }, [dispatch, open]);
 
     const handleAccept = () => {
         localStorage.setItem("cookieConsent", cookieConsent ? "true" : "false");
@@ -74,7 +75,7 @@ const CookieConsentPopup = () => {
                     Accept
                 </Button>
                 <Button
-                   onClick={onClose}
+                    onClick={onClose}
                     className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 w-full md:w-auto"
                 >
                     Decline
