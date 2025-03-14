@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 // Adjust path as needed
-
 import StripeComponent from '../components/StripeComponent';
 import { Button, Card, Typography, Stack } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -10,6 +9,7 @@ import SvgIcon from '@mui/material/SvgIcon';
 import { RootState } from '../redux/store';
 import { useRouter } from 'next/navigation';
 import { convertToSubcurrency } from '../utils/convertToSubCurrency';
+import PaypalComponent from '../components/PaypalComponent';
 
 const PayPalIcon = (props: React.ComponentProps<typeof SvgIcon>) => (
   <SvgIcon {...props} viewBox="0 0 24 24">
@@ -105,7 +105,7 @@ const Checkout = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {paymentMethod === 'paypal' ? null : <StripeComponent amount={amountInCents} />}
+          {paymentMethod === 'paypal' ? <PaypalComponent amount={amountInCents} /> : <StripeComponent amount={amountInCents} />}
         </motion.div>
       </Card>
     </div>
