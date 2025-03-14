@@ -1,14 +1,14 @@
 // app/api/create-order/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-const PAYPAL_SECRET = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_SECRET;
+const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
+const PAYPAL_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 
 export async function POST(request: NextRequest) {
   try {
     const { amount } = await request.json();
 
-    const response = await fetch(process.env.NEXT_PUBLIC_PAYPAL_BASE_URL + "/v2/checkout/orders", {
+    const response = await fetch(process.env.PAYPAL_BASE_URL + "/v2/checkout/orders", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
