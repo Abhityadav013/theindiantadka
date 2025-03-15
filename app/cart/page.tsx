@@ -36,7 +36,7 @@ const CartItem = () => {
   }, [isMobileView, router]);
   
   return isLoading ? (
-    <Loader loadingImage={'https://d17b2befa637skvb.public.blob.vercel-storage.com/cart-item-loader.gif'} isLoading={isLoading} />
+    <Loader loadingImage={'https://testing.indiantadka.eu/assets/cart-item-loader.gif'} isLoading={isLoading} />
   ) : (
     <>
       {

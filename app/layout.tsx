@@ -8,6 +8,7 @@ import MobileViewDetector from "./components/MobileViewDetector";
 import theme from "./theme";
 import LoginDrawer from "./components/LoginDrawer";
 import CookieConsentPopup from "./components/CookiesConset";
+import AddressDetector from "./components/AddressDetector";
 
 
 // Configure the Outfit font
@@ -37,6 +38,7 @@ export default function RootLayout({
               <CssBaseline />
               <CookieConsentPopup/>
               <MobileViewDetector />
+              <AddressDetector />
               <LoginDrawer />
             {/* Include MobileViewDetector */}
               {children}

@@ -81,7 +81,7 @@ const NavBar = () => {
           {/* <Link href={isMobileView ? "/checkout" : "/cart"}> */}
           <Link href={'/order-details'}>
             <Image
-              src="https://d17b2befa637skvb.public.blob.vercel-storage.com/basket_icon.png"
+              src="https://testing.indiantadka.eu/assets/basket_icon.png"
               alt="Cart Icon"
               width={24}
               height={24}

@@ -5,12 +5,18 @@ import AddAddressButton from "./AddAddressButton";
 import AddLocationAltOutlinedIcon from '@mui/icons-material/AddLocationAltOutlined';
 import AddressForm from "./AddressForm";
 
-const AddAddressSection: React.FC = () => {
+interface AddAddressSectionProps{
+    isMobile:boolean
+}
+const AddAddressSection: React.FC<AddAddressSectionProps> = ({isMobile}) => {
     return (
         <Box
-            className="fixed left-1/2 bottom-0 transform -translate-x-1/2 bg-white text-white p-4 flex flex-col justify-between items-start shadow-lg z-50"
+            className={
+                `fixed left-1/2 bottom-0 transform -translate-x-1/2
+                 bg-white text-white p-4 flex flex-col justify-between items-start
+                  ${isMobile ? 'shadow-lg z-50' : ""}`}
             sx={{
-                width: "100%",
+                width: isMobile ? "100%" : '80%',
                 height: "auto",
                 padding: "8px",
                 gap: "8px"

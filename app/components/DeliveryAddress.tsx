@@ -7,15 +7,9 @@ import { RootState } from "../redux/reducers";
 import { AppDispatch } from "../redux/store";
 import { getLocationData } from "../utils/location_data";
 import { UserAddress } from "../utils/types/address_type";
-// import AddressOptions from "./AddressOptions";
-import DeliveryAddress from "./DefaultAddress";
-import AddressOptions from "./AddressOptions";
-
 const AddressSelection = () => {
   const [isAddressFetched, setIsAddressFetched] = useState(false)
   const [isLoading, setIsLoading] = useState(true);
-  const [isDeliveryAddressModal, setDeliveryAddressModal] = useState(false);
-  const [deliveryAddress, setDeliveryAddress] = useState<UserAddress | undefined>();
   const { addressModel: isAddressModelOpen, address, userAddress } = useSelector((state: RootState) => state.address);
   const dispatch = useDispatch<AppDispatch>();
   const onSubmit = (values: AddressInput) => {
@@ -66,24 +60,16 @@ const AddressSelection = () => {
 
   }, [dispatch, closeAddressDrawer, isLoading, address, userAddress, isAddressFetched]);
 
-  useEffect(() => {
-    if (userAddress.length > 0) {
-      const address = userAddress.find((add) => add.addressType === 'home') || null;
-      setDeliveryAddress(address ?? undefined);
-    }
-  }, [userAddress]);
-
-
   return (
     <div className="p-6 bg-white">
     <AddNewAddress onSubmit={onSubmit} isOpen={isAddressModelOpen} onClose={closeAddressDrawer} address={address} isMobile={false} />
     {/* ToDo: Need to implement this later when we have functonality of login */}
     {/* <CheckoutSteps /> */}
-    {
+    {/* {
         (userAddress.length > 0 || userAddress.some((address) => address.addressType === 'home')) && !isDeliveryAddressModal && false
           ? <DeliveryAddress addressData={deliveryAddress} onClose={() => setDeliveryAddressModal(!isDeliveryAddressModal)} />
           : <AddressOptions userAddress={userAddress} onClose={() => setDeliveryAddressModal(!isDeliveryAddressModal)} />
-    }
+    } */}
   </div>
   )
 

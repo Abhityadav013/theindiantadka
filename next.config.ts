@@ -7,7 +7,6 @@ const nextConfig:NextConfig = {
       'testing.indiantadka.eu',
       'google.com', // Remove 'https://'
       'localhost', // Remove 'http://'
-      'd17b2befa637skvb.public.blob.vercel-storage.com', // Correct format
     ]
   },
 };

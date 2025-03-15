@@ -10,7 +10,7 @@ interface AddressSectionProps {
 }
 const AddressSection: React.FC<AddressSectionProps> = ({userAddress}) => {
   return (
-    <Card className="flex items-center mt-4 p-3 border border-gray-300 shadow-sm rounded-lg w-full max-w-md">
+    <Card className="flex items-center mt-4 p-3 border border-gray-300 shadow-sm rounded-lg w-full">
       {/* Icon Section */}
       <div className="relative w-12 h-12 flex justify-center items-center border border-gray-300 rounded-lg">
         <HomeIcon className="text-gray-700" fontSize="medium" />

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Box, Button, Typography, TextField, InputAdornment } from "@mui/material";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
+import CloseIcon from '@mui/icons-material/Close';
 
 const TipOptions = () => {
     const [selectedTip, setSelectedTip] = useState<number | string>();
@@ -9,45 +10,69 @@ const TipOptions = () => {
     const [isMostPopularDisabled, setIsMostPopularDisabled] = useState(false);
 
     const handleTipSelection = (amount: number | string) => {
-
-        setSelectedTip(amount);
-        if (amount !== 10) {
-            setIsMostPopularDisabled(true);
+        if (selectedTip === amount) {
+            setSelectedTip(undefined);
+            setCustomTip('');
+            sessionStorage.removeItem('tipAmount');
+            sessionStorage.removeItem('tipType');
+            if (amount !== 10) {
+                setIsMostPopularDisabled(true);
+            } else {
+                setIsMostPopularDisabled(false);
+            }
         } else {
-            setIsMostPopularDisabled(false);
-        }
-        // Reset custom tip when selecting preset values
-        if (amount !== "Other") {
-            setCustomTip("");
-            sessionStorage.removeItem('tipType')
-            sessionStorage.setItem('tipAmount', String(amount))
-        } else {
-            sessionStorage.setItem('tipType', 'Other');
+            setSelectedTip(amount);
+            // Reset custom tip when selecting preset values
+            if (amount !== "Other") {
+                setCustomTip("");
+                sessionStorage.removeItem('tipType')
+                sessionStorage.setItem('tipAmount', String(amount))
+            } else {
+                sessionStorage.removeItem('tipAmount')
+                sessionStorage.setItem('tipType', 'Other');
+            }
         }
     };
 
-    const handleCustomTip = (event: React.ChangeEvent<HTMLInputElement>) =>{
+    const handleCustomTip = (event: React.ChangeEvent<HTMLInputElement>) => {
         setCustomTip(event.target.value)
-        sessionStorage.setItem('tipAmount', event.target.value); 
+        sessionStorage.setItem('tipAmount', event.target.value);
     }
-    useEffect(() => {
-        const tipAmount = sessionStorage.getItem('tipAmount');
-        const tipType = sessionStorage.getItem('tipType');
-        if (tipAmount && tipType !== 'Other') {
-            setSelectedTip(Number(tipAmount)); // Sets to preset tip value
-        } else {
-            setSelectedTip('Other'); // Sets to "Other"
-            setCustomTip(tipAmount || ''); // If there's a stored custom tip, set it
-        }
-    }, []); // Only run on component mount
 
-    useEffect(() =>{
-        if(selectedTip !== 10){
-            setIsMostPopularDisabled(true)
-        }else{
-            setIsMostPopularDisabled(false)
+    useEffect(() => {
+
+        const checkSessionStorage = () => {
+            const tipAmount = sessionStorage.getItem('tipAmount');
+            const tipType = sessionStorage.getItem('tipType');
+            if (tipAmount && tipType !== 'Other') {
+                setSelectedTip(Number(tipAmount)); // Sets to preset tip value
+                // setIsMostPopularDisabled(true)
+            }
+            else if (tipAmount) {
+                setSelectedTip('Other'); // Sets to "Other"
+                setCustomTip(tipAmount || ''); // If there's a stored custom tip, set it
+            }
+        };
+
+        checkSessionStorage();
+    
+        // Set up interval to check sessionStorage every 500ms
+        const intervalId = setInterval(checkSessionStorage, 5);
+    
+        // Clean up the interval when the component unmounts
+        return () => clearInterval(intervalId);
+    }, [selectedTip]); // Only run on component mount
+
+    useEffect(() => {
+        const checkMostPopular =() =>{
+            if (selectedTip && selectedTip !== 10) {
+                setIsMostPopularDisabled(true)
+            } else if (selectedTip !== undefined) {
+                setIsMostPopularDisabled(false)
+            }
         }
-    },[selectedTip])
+        checkMostPopular()
+    }, [selectedTip])
 
     return (
         <Box className="mt-4 p-3 border rounded-lg bg-white shadow-md">
@@ -58,7 +83,7 @@ const TipOptions = () => {
                 </Typography>
             </Box>
             <Typography variant="body2" className="text-gray-600 mt-1">
-                Day & night, our delivery partners bring your favourite meals. Thank them with a tip.
+                Our delivery partners bring your favourite meals. Thank them with a tip.
             </Typography>
 
             {/* Tip Buttons */}
@@ -68,10 +93,13 @@ const TipOptions = () => {
                         key={amount}
                         variant="outlined"
                         onClick={() => handleTipSelection(amount)}
-                        className={`border-[#ccc] px-4 py-2 text-black relative ${selectedTip === amount ? "border-orange-500" : ""
+                        className={`border-[#ccc]  px-4 py-2 text-black relative ${selectedTip === amount ? "border-orange-500" : ""
                             }`}
                     >
                         €{amount !== "Other" ? amount : "Other"}
+                        {selectedTip === amount && selectedTip !== 'Other' && (
+                            <CloseIcon className="text-sm text-tomato ml-2" />
+                        )}
                         {amount === 10 && !isMostPopularDisabled && (
                             <Box
                                 className="absolute mt-7 w-full max-w-3xl bg-orange-500 text-white text-[9px] px-0 py-0 space-x-2"

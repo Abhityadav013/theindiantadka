@@ -1,4 +1,4 @@
-import { Box, Button, InputAdornment, LinearProgress, TextField, Typography } from '@mui/material';
+import { Box, Button, LinearProgress, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import CartDialog, { DescriptionSubmit } from '../CartDialog';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,12 +7,11 @@ import { RootState } from '@/app/redux/reducers';
 import { FoodItem } from '@/app/utils/types/menu_type';
 import { updateCartDescriptionItem, updateCartItem } from '@/app/redux/reducers/cartReducer';
 import { CartDescription } from '@/app/utils/types/cart_type';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-import { Divider } from 'antd';
+
 
 const CartItem = () => {
   const [isCustomizeModal, setCustomizeModal] = useState(false);
-  const [text, setText] = useState("");
+
   const [fetchCart, setFetchCart] = useState<FoodItem[]>([]);
   const [isCartUpdated, setCartUpdated] = useState(false);
 
@@ -75,18 +74,6 @@ const CartItem = () => {
   const handleItemDescription = (value: DescriptionSubmit) => {
     const description: CartDescription = value.description;
     dispatch(updateCartDescriptionItem(description));
-  };
-
-  useEffect(() => {
-    const savedText = localStorage.getItem("restaurantSuggestion");
-    if (savedText) {
-      setText(savedText);
-    }
-  }, []);
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setText(event.target.value);
-    localStorage.setItem("restaurantSuggestion", event.target.value);
   };
 
   return (
@@ -154,22 +141,6 @@ const CartItem = () => {
           );
         })
       )}
-      <Divider className="mt-4 mb-4" style={{ border: "1px solid rgba(2, 6, 12, .1)" }} />
-      <TextField
-        fullWidth
-        placeholder="Write Suggestion to restaurant..."
-        onChange={handleChange}
-        value={text}
-        variant="standard"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <ReceiptIcon />
-            </InputAdornment>
-          ),
-          disableUnderline: true,
-        }}
-      />
     </Box>
   );
 };

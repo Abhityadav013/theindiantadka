@@ -99,7 +99,7 @@ const MenuFoodItem: React.FC<MenuFoodItemProps> = ({ food_item }) => {
       >
         € {food_item.price}
         <Image
-          src="https://D17B2bEFA637skvB.public.blob.vercel-storage.com/rating_starts.png"
+          src="https://testing.indiantadka.eu/assets/rating_starts.png"
           alt="rating"
           width={70}
           height={15}

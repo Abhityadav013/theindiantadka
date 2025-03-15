@@ -12,7 +12,7 @@ interface AddressFormProps {
     isOpen: boolean;
     onClose: () => void; // onClose function to close the drawer
     address: Address,
-    isMobile:boolean
+    isMobile: boolean
 }
 
 export interface AddressInput {
@@ -21,7 +21,7 @@ export interface AddressInput {
     street: string;
     pincode: string;
     addressType: string
-    
+
 }
 
 
@@ -44,7 +44,7 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
         if (address) {
             setStreet(address.road || "");
             setPincode(address.postcode || "");
-            setBuildingNumber(address.house_number|| "")
+            setBuildingNumber(address.house_number || "")
         }
     }, [address]);
 
@@ -57,7 +57,7 @@ const AddNewAddress: React.FC<AddressFormProps> = ({
     };
     return (
         <Drawer
-            anchor="bottom"
+            anchor={isMobile ? "bottom" : "left"}
             open={isOpen}
             onClose={onClose}
             sx={{
