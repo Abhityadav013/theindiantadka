@@ -3,15 +3,17 @@ import React from 'react'
 import { Button } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useRouter } from 'next/navigation'
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 const CartNavigate = () => {
     const router = useRouter(); // Initialize router
-    // const isMobileView = useSelector((state: RootState) => state.mobile.isMobile);
+   const isMobileView = useSelector((state: RootState) => state.mobile.isMobile);
 
     const handleNavigate = () => {
       // ToDo:: Need this when we have Login functioanlity
-      // router.push(isMobileView ? "/checkout" : "/cart"); // Navigate to cart page
-      router.push('order-details')
+      router.push(isMobileView ? "/checkout" : "/cart"); // Navigate to cart page
+      //router.push('order-details')
     };
   return (
     <Button

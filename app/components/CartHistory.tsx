@@ -71,15 +71,7 @@ const CartHistory = () => { // Managing checkbox state
                 </div>
                 <Divider className="my-2" />
 
-                <Box
-                    sx={{
-                        height: '70vh',
-                        overflowY: 'auto',
-                        padding: '8px',
-                        scrollbarWidth: 'none', // Hide scrollbar for Firefox
-                        '&::-webkit-scrollbar': { display: 'none' } // Hide scrollbar for Chrome, Safari, Edge
-                    }}
-                >
+                <Box>
                     {filteredFoodItems.map((item, index) => {
                         const cartItem = cart.find(cartItem => cartItem.itemId === item.id);
                         const quantity = cartItem ? cartItem.quantity : 0;
