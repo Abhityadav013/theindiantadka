@@ -3,11 +3,14 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Typography, TextField, InputAdornment } from "@mui/material";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import CloseIcon from '@mui/icons-material/Close';
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
 
 const TipOptions = () => {
     const [selectedTip, setSelectedTip] = useState<number | string>();
     const [customTip, setCustomTip] = useState(""); // Stores custom tip value
     const [isMostPopularDisabled, setIsMostPopularDisabled] = useState(false);
+    const isMobileView = useSelector((state: RootState) => state.mobile.isMobile);
 
     const handleTipSelection = (amount: number | string) => {
         if (selectedTip === amount) {
@@ -55,16 +58,16 @@ const TipOptions = () => {
         };
 
         checkSessionStorage();
-    
+
         // Set up interval to check sessionStorage every 500ms
         const intervalId = setInterval(checkSessionStorage, 5);
-    
+
         // Clean up the interval when the component unmounts
         return () => clearInterval(intervalId);
     }, [selectedTip]); // Only run on component mount
 
     useEffect(() => {
-        const checkMostPopular =() =>{
+        const checkMostPopular = () => {
             if (selectedTip && selectedTip !== 10) {
                 setIsMostPopularDisabled(true)
             } else if (selectedTip !== undefined) {
@@ -87,7 +90,7 @@ const TipOptions = () => {
             </Typography>
 
             {/* Tip Buttons */}
-            <Box className="flex space-x-2 mt-3">
+            <Box className={`flex mt-3 ${isMobileView ? 'gap-1' : 'gap-3'} justify-start`}>
                 {[5, 10, 20, "Other"].map((amount) => (
                     <Button
                         key={amount}
@@ -95,6 +98,12 @@ const TipOptions = () => {
                         onClick={() => handleTipSelection(amount)}
                         className={`border-[#ccc]  px-4 py-2 text-black relative ${selectedTip === amount ? "border-orange-500" : ""
                             }`}
+                        sx={{
+                            maxWidth: "100px",  // Ensure buttons don't shrink too much
+                            // whiteSpace: "nowrap", // Prevent text from wrapping
+                            // overflow: "hidden",  // Prevent overflow
+                            // textOverflow: "ellipsis", // In case of long text
+                        }}
                     >
                         €{amount !== "Other" ? amount : "Other"}
                         {selectedTip === amount && selectedTip !== 'Other' && (

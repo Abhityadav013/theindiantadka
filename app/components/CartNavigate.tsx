@@ -12,7 +12,7 @@ const CartNavigate = () => {
 
     const handleNavigate = () => {
       // ToDo:: Need this when we have Login functioanlity
-      router.push(isMobileView ? "/checkout" : "/cart"); // Navigate to cart page
+      router.push(isMobileView ? "/checkout" : "/checkout"); // Navigate to cart page
       //router.push('order-details')
     };
   return (

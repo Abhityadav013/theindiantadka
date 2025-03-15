@@ -70,7 +70,7 @@ const NavBar = () => {
         {/* Cart Icon and Cart Count */}
         <Box className="relative">
           {/* ToDo:: Allow this when we have Login Functioanlity */}
-          <Link href={isMobileView ? "/checkout" : "/cart"}>
+          <Link href={isMobileView ? "/checkout" : "/checkout"}>
           {/* <Link href={'/order-details'}> */}
             <Image
               src="https://testing.indiantadka.eu/assets/basket_icon.png"
