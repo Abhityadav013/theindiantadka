@@ -65,7 +65,7 @@ const LoginDrawer = () => {
       );
       if (response.data.statusCode === 200) {
         localStorage.setItem("_is_user_logged_in", 'true');
-        sessionStorage.removeItem('tid');
+        localStorage.removeItem('tid');
         fetchUser(); // Fetch user after successful login
         dispatch(setLoginModal(false));
       }
@@ -85,7 +85,7 @@ const LoginDrawer = () => {
       );
       if (response.data.statusCode === 201) {
         localStorage.setItem("_is_user_logged_in", 'true');
-        sessionStorage.removeItem('tid');
+        localStorage.removeItem('tid');
         fetchUser(); // Fetch user after successful login
         dispatch(setLoginModal(false));
       }

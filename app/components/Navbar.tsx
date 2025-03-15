@@ -28,7 +28,7 @@ const NavBar = () => {
   const [isLoading, setLoading] = useState(true);
   const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
   const { otpModal, otpExpireAt, profile } = useSelector((state: RootState) => state.user);
-  const isMobileView = useSelector((state: RootState) => state.mobile.isMobile);
+  // const isMobileView = useSelector((state: RootState) => state.mobile.isMobile);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -51,8 +51,8 @@ const NavBar = () => {
         setUserDetails(null);
         dispatch({ type: "cart/fetchCartSaga" });
         localStorage.removeItem("_is_user_logged_in");
-        sessionStorage.setItem('tid', response.data.tid);
-        sessionStorage.setItem('ssid',response.data.deviceId)
+        localStorage.setItem('tid', response.data.tid);
+        localStorage.setItem('ssid',response.data.deviceId)
       }
     } catch (err) {
       console.error("Error logging out:", err);
@@ -77,9 +77,11 @@ const NavBar = () => {
 
         {/* Cart Icon and Cart Count */}
         <Box className="relative">
-          <Link href={isMobileView ? "/checkout" : "/cart"}>
+          {/* ToDo:: Allow this when we have Login Functioanlity */}
+          {/* <Link href={isMobileView ? "/checkout" : "/cart"}> */}
+          <Link href={'/order-details'}>
             <Image
-              src="https://testing.indiantadka.eu/assets/basket_icon.png"
+              src="https://d17b2befa637skvb.public.blob.vercel-storage.com/basket_icon.png"
               alt="Cart Icon"
               width={24}
               height={24}

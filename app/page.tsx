@@ -13,6 +13,7 @@ async function getMenuData() {
       fetch(`${menu_url}/menu`, { next: { revalidate: 3600 } }), // Cache for 1 hour
       fetch(`${menu_url}/category`, { next: { revalidate: 3600 } }),
     ]);
+    
 
     if (!menuResponse.ok || !categoryResponse.ok) {
       throw new Error("Failed to fetch data");

@@ -10,7 +10,6 @@ import { UserAddress } from "../utils/types/address_type";
 // import AddressOptions from "./AddressOptions";
 import DeliveryAddress from "./DefaultAddress";
 import AddressOptions from "./AddressOptions";
-import CheckoutSteps from "./CheckoutSteps/CheckOutStep";
 
 const AddressSelection = () => {
   const [isAddressFetched, setIsAddressFetched] = useState(false)
@@ -78,7 +77,8 @@ const AddressSelection = () => {
   return (
     <div className="p-6 bg-white">
     <AddNewAddress onSubmit={onSubmit} isOpen={isAddressModelOpen} onClose={closeAddressDrawer} address={address} isMobile={false} />
-    <CheckoutSteps />
+    {/* ToDo: Need to implement this later when we have functonality of login */}
+    {/* <CheckoutSteps /> */}
     {
         (userAddress.length > 0 || userAddress.some((address) => address.addressType === 'home')) && !isDeliveryAddressModal && false
           ? <DeliveryAddress addressData={deliveryAddress} onClose={() => setDeliveryAddressModal(!isDeliveryAddressModal)} />

@@ -12,7 +12,7 @@ const EmptyCart = () => {
         >
             <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                 <Image
-                    src={'https://testing.indiantadka.eu/assets/empty_cart.avif'}
+                    src={'https://D17B2bEFA637skvB.public.blob.vercel-storage.com/empty_cart.avif'}
                     alt={'empty cart'}
                     width={300}
                     height={300}

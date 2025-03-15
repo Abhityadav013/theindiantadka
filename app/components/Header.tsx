@@ -9,7 +9,7 @@ const Header = () => {
         mx: "auto",
         mt: { xs: "15px", sm: "30px" }, // Adjust margin top for smaller screens
         position: "relative",
-        backgroundImage: "url('https://testing.indiantadka.eu/assets/header_img.png')",
+        backgroundImage: "url('https://D17B2bEFA637skvB.public.blob.vercel-storage.com/header_img.png')",
         backgroundSize: "contain",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center", // Center the background image

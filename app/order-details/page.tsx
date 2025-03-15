@@ -8,7 +8,7 @@ import FakeSection from '../components/MobileView/FakeCheckout';
 import CartSection from '../components/MobileView/CartSection';
 import CartItem from '../components/MobileView/CartItem';
 import { Box } from '@mui/material';
-import NoContactDelivery from '../components/MobileView/NoContactDelivery';
+// import NoContactDelivery from '../components/MobileView/NoContactDelivery';
 import TipOptions from '../components/MobileView/TipOptions';
 import BillDetails from '../components/MobileView/BillDetails';
 import ReviewOrderSection from '../components/MobileView/ReviewOrderSection';
@@ -23,8 +23,6 @@ const Checkout = () => {
   const { profile, loginModal } = useSelector((state: RootState) => state.user);
   const { userAddress } = useSelector((state: RootState) => state.address);
 
-
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -36,7 +34,7 @@ const Checkout = () => {
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Loader loadingImage={'https://d17b2befa637skvb.public.blob.vercel-storage.com/cart-item-loader.gif'} isLoading={isLoading} />
+        <Loader loadingImage={'https://D17B2bEFA637skvB.public.blob.vercel-storage.com/cart-item-loader.gif'} isLoading={isLoading} />
       </Box>
     );
   }
@@ -50,13 +48,13 @@ const Checkout = () => {
         <Box className="mt-20"> {/* Add margin to ensure CartItem is below CartSection */}
           <CartItem />
         </Box>
-        <Box className="mt-4 bg-gradient-to-b from-[#fffbf5] to-[#fff7f4] border-tomato"
+        {/* <Box className="mt-4 bg-gradient-to-b from-[#fffbf5] to-[#fff7f4] border-tomato"
           sx={{
             border: "1px solid #ff5200", // 🔥 Updated border color
             borderRadius: "4px"
           }}>
           <NoContactDelivery />
-        </Box>
+        </Box> */}
         <Box> {/* Add margin to ensure CartItem is below CartSection */}
           <TipOptions />
         </Box>

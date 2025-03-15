@@ -10,7 +10,7 @@ const NavBarWrapper = () => {
         <Box className="py-5 flex justify-between items-center">
             <Link href="/">
                 <Image
-                    src="https://testing.indiantadka.eu/logo.jpg"
+                    src="https://d17b2befa637skvb.public.blob.vercel-storage.com/logo.jpg"
                     alt="Logo"
                     width={80}
                     height={18}

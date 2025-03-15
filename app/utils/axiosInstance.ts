@@ -8,8 +8,8 @@ const api = axios.create({
 // Request Interceptor (Optional: If you need to modify headers)
 api.interceptors.request.use(
   (config) => {
-    const tid = sessionStorage.getItem('tid'); // Retrieve tid from session storage
-    const ssid = sessionStorage.getItem('ssid');
+    const tid = localStorage.getItem('tid'); // Retrieve tid from session storage
+    const ssid = localStorage.getItem('ssid');
     if (tid || ssid) {
       config.headers['tid'] = tid; // Add tid to request headers
       config.headers['ssid'] = ssid;

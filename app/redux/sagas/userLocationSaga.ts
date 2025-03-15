@@ -65,7 +65,7 @@ function* fetchUserLocationSaga(): Generator<
       }
 
       // ✅ Only register session if `tid` is not set
-      if (!sessionStorage.getItem('tid')) {
+      if (!localStorage.getItem('tid')) {
         let response: DeviceInfo;
 
         // ✅ Only send location if consent is given
@@ -75,8 +75,8 @@ function* fetchUserLocationSaga(): Generator<
           response = (yield call(registerSessionAPI)) as DeviceInfo;
         }
 
-        sessionStorage.setItem('tid', response.tid);
-        sessionStorage.setItem('ssid',response.deviceId)
+        localStorage.setItem('tid', response.tid);
+        localStorage.setItem('ssid',response.deviceId)
 
         // ✅ Store location in localStorage only if consent is given
         if (locationConsent && userLocation) {

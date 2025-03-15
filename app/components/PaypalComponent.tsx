@@ -39,7 +39,7 @@ const PaypalComponent = ({ amount }: { amount: number }) => {
     }
 
     return (
-        <PayPalScriptProvider options={{clientId : process.env.PAYPAL_CLIENT_ID || ''}}>
+        <PayPalScriptProvider options={{clientId : process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || ''}}>
             <div className="paypal-button-container">
                 <PayPalButtons
                     createOrder={(data, actions) => {

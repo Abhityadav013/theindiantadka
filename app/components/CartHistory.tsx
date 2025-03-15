@@ -74,7 +74,7 @@ const CartHistory = () => {
                 {/* Header Section */}
                 <div className="flex items-center gap-4">
                     <Image
-                        src="https://testing.indiantadka.eu/assets/food.webp"
+                        src="https://D17B2bEFA637skvB.public.blob.vercel-storage.com/food.webp"
                         alt="Food image for the restaurant menu"
                         width={50}
                         height={50}
