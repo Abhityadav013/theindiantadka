@@ -36,7 +36,7 @@ const Checkout = () => {
       if (isMobileView) {
         router.push("/checkout");
       } else {
-        router.push("/cart");
+        router.push("/checkout");
       }
     }
   }, [cartTotal, isMobileView, router]);
@@ -53,7 +53,8 @@ const Checkout = () => {
 
     fetchAmountInCents();
   }, [cartTotal]);  // This effect will run whenever 'amount' changes
-  if (!loading) {
+  
+  if (!loading && amountInCents <= 0) {
     return (
       <div className="flex items-center justify-center">
         <div
