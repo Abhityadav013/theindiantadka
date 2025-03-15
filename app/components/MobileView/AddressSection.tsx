@@ -20,7 +20,7 @@ const AddressSection: React.FC<AddressSectionProps> = ({userAddress}) => {
       {/* Delivery Info */}
       <CardContent className="flex-1 ml-4 p-0">
         <h3 className="text-lg font-semibold">Deliver to Home</h3>
-        <p className="text-sm text-gray-500">{userAddress[0].street}</p>
+        <p className="text-sm text-gray-500">{userAddress[0]?.street||''}</p>
         <p className="text-sm font-bold">35-40 MINS</p>
       </CardContent>
 
