@@ -54,7 +54,7 @@ const CartHistory = () => { // Managing checkbox state
 
     return (
         <Card
-            className="max-w-md sm:max-w-lg mx-auto bg-white shadow-lg rounded-lg border">
+            className="flex flex-col min-h-[100px] justify-between items-center py-3 overflow-y-auto">
             <CardContent className="p-6">
                 {/* Header Section */}
                 <div className="flex items-center gap-4">

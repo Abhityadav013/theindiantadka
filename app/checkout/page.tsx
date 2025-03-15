@@ -53,14 +53,14 @@ const Checkout = () => {
       <Box> {/* Add padding to the bottom */}
         <CartSection />
         {/* Cart Item Section with fixed height and scroll */}
-        <Box className={!isMobile ? `max-w-8xl mx-auto flex justify-between gap-4 bg-white` : ''}>
+        <Box className={!isMobile ? `max-w-8xl mx-auto flex gap-4 space-around bg-white` : ''}>
           {
             isMobile ?
               (<Box className="mt-20">
                 <CartItem />
               </Box>) :
               (
-                <div className="mt-20">
+                <div className="mt-20  ml-10 mr-14">
                   <CartHistory />
                 </div>
               )

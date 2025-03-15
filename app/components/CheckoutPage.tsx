@@ -41,7 +41,7 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
             elements,
             clientSecret,
             confirmParams: {
-                return_url: process.env.PAYMENT_SUCCESS_URL|| '',
+                return_url: 'https://theindiantadka.vercel.app/payment-success',
             },
             
         })
