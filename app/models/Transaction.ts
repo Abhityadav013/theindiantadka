@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';  // uuid for generating unique transactionId
 import { Counter } from './Counter';
 
+export const TransactionSchemaName = "Transaction"; // Collection name
 interface ITransaction extends Document {
   transactionId: string;  // Make sure transactionId is part of the schema
   paymentProvider: string;
@@ -14,7 +15,7 @@ interface ITransaction extends Document {
   displayId: string;
 }
 
-const transactionSchema = new Schema<ITransaction>({
+const TransactionSchema = new Schema<ITransaction>({
   transactionId: { type: String, required: true,default: uuidv4, unique: true },  // Ensure transactionId is required and unique
   paymentProvider: { type: String, required: true },
   paymentIntentId: { type: String, required: true, unique: true },
@@ -24,10 +25,15 @@ const transactionSchema = new Schema<ITransaction>({
   created: { type: Date, required: true },
   metadata: { type: Object, required: true },
   displayId: { type: String, unique: true }, // Unique displayId
-});
+},
+{
+    versionKey:false,
+    collection:TransactionSchemaName
+}
+);
 
 // Pre-save hook for generating transactionId and displayId
-transactionSchema.pre('save', async function (next) {
+TransactionSchema.pre('save', async function (next) {
   if (this.isNew) {
 
     const counter = await Counter.findByIdAndUpdate(
@@ -40,7 +46,7 @@ transactionSchema.pre('save', async function (next) {
   next();
 });
 
-const Transaction = mongoose.models.Transaction || mongoose.model('Transaction', transactionSchema);
+const Transaction = mongoose.model('Transaction', TransactionSchema)
 
 export default Transaction;
 
