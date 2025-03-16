@@ -56,7 +56,7 @@ const storeTransaction = async (
 ) => {
   console.log(':::::::::::::::Order Transaction Started::::::::::')
   try {
-    const transaction = new Transaction({
+    const transaction = new Transaction({ // Generate a unique transaction ID
       paymentProvider: 'Stripe',
       paymentIntentId: paymentIntent.id,
       amount: paymentIntent.amount_received / 100,  // Convert from cents
@@ -75,3 +75,4 @@ const storeTransaction = async (
     console.error('Error inserting transaction:', error);
   }
 };
+

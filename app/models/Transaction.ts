@@ -1,9 +1,9 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';  // uuid for generating unique transactionId
 import { Counter } from './Counter';
 
-
 interface ITransaction extends Document {
+  transactionId: string;  // Make sure transactionId is part of the schema
   paymentProvider: string;
   paymentIntentId: string;
   amount: number;
@@ -11,12 +11,11 @@ interface ITransaction extends Document {
   status: string;
   created: Date;
   metadata: Record<string, string | number | boolean>;
-  transactionId: string;
   displayId: string;
 }
 
 const transactionSchema = new Schema<ITransaction>({
-  transactionId: { type: String, required: true, unique: true },
+  transactionId: { type: String, required: true,default: uuidv4, unique: true },  // Ensure transactionId is required and unique
   paymentProvider: { type: String, required: true },
   paymentIntentId: { type: String, required: true, unique: true },
   amount: { type: Number, required: true },
@@ -30,7 +29,6 @@ const transactionSchema = new Schema<ITransaction>({
 // Pre-save hook for generating transactionId and displayId
 transactionSchema.pre('save', async function (next) {
   if (this.isNew) {
-    this.transactionId = uuidv4(); // Generate unique transactionId
 
     const counter = await Counter.findByIdAndUpdate(
       { _id: 'orderId' },
@@ -45,3 +43,4 @@ transactionSchema.pre('save', async function (next) {
 const Transaction = mongoose.models.Transaction || mongoose.model('Transaction', transactionSchema);
 
 export default Transaction;
+
