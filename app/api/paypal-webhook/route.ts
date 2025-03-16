@@ -28,10 +28,12 @@ export async function POST(request: NextRequest) {
   try {
     // Use request.text() to get the raw body as a string
     const body = await request.text();
+    console.log(':::::::::::::::PAYPAL Transaction Step 1::::::::::')
 
     // PayPal webhook signature verification
     const paypalSignature = request.headers.get('paypal-auth-algo');
     const paypalTransmissionSig = request.headers.get('paypal-transmission-sig');
+    console.log(':::::::::::::::PAYPAL Transaction Step 2::::::::::',paypalSignature,paypalTransmissionSig)
 
     if (!paypalSignature || !paypalTransmissionSig) {
       return NextResponse.json(
@@ -39,20 +41,23 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
+    
+    console.log(':::::::::::::::PAYPAL Transaction Step 3::::::::::')
     const verifySignature = verifyPayPalSignature(
       body,
       paypalSignature,
       paypalTransmissionSig
     );
 
+    console.log(':::::::::::::::PAYPAL Transaction Step 4::::::::::',verifySignature)
     if (!verifySignature) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
     // Parse the webhook event
     const event = JSON.parse(body);
-
+    console.log(':::::::::::::::PAYPAL Transaction Step 5::::::::::',event.event_type)
+    
     // Handle the event based on its type
     switch (event.event_type) {
       case 'PAYMENT.SALE.COMPLETED':

@@ -37,18 +37,6 @@ export async function POST(req: Request) {
   return NextResponse.json({ received: true });
 }
 
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const verify = url.searchParams.get('verify');
-
-  if (verify === 'true') {
-    return NextResponse.json({ message: 'Webhook verified' });
-  }
-
-  return NextResponse.json({ message: 'Webhook is live' });
-}
-
-
 const storeTransaction = async (
   paymentIntent: Stripe.PaymentIntent,
   status: string
