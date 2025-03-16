@@ -7,24 +7,52 @@ const PAYPAL_SECRET = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_SECRET;
 const PAYPAL_BASE_URL =
   process.env.NEXT_PUBLIC_PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com';
 
-interface PayPalAmount {
+interface Payee {
+  email_address: string;
+  merchant_id: string;
+}
+
+interface Amount {
   value: string;
   currency_code: string;
 }
-interface PayPalTransactionData {
-  id: string; // PayPal transaction ID
-  status: string; // Status of the payment (e.g., 'COMPLETED', 'PENDING', 'DENIED')
-  amount: {
-    total: string; // Total amount paid (as a string to handle currencies)
-    currency_code: string; // Currency code (e.g., 'USD')
-  };
-  create_time: string; // Timestamp of the transaction creation (ISO 8601 format)
-  custom?: string; // Optional custom metadata, if provided
-  payer_id: string; // PayPal payer ID
-  payment_method: string; // Payment method used (e.g., 'paypal', 'credit_card')
-  paymentIntentId: string;
-  paypal_fee: PayPalAmount;
+
+interface SellerProtection {
+  dispute_categories: string[]; // Array of dispute categories like 'ITEM_NOT_RECEIVED', 'UNAUTHORIZED_TRANSACTION'
+  status: string; // Status of the seller protection, e.g., 'ELIGIBLE'
 }
+
+interface SupplementaryData {
+  related_ids: { [key: string]: string }; // An object with related IDs (e.g., order ID, etc.)
+}
+
+interface SellerReceivableBreakdown {
+  paypal_fee: Amount; // Fee amount breakdown for PayPal
+  gross_amount: Amount; // Gross amount before fees
+  net_amount: Amount; // Net amount after fees
+}
+
+interface Link {
+  method: string;
+  rel: string;
+  href: string;
+}
+
+interface PayPalTransactionResource {
+  payee: Payee;
+  amount: Amount;
+  seller_protection: SellerProtection;
+  supplementary_data: SupplementaryData;
+  update_time: string; // Timestamp of when the transaction was last updated
+  create_time: string; // Timestamp of when the transaction was created
+  final_capture: boolean; // Whether this is the final capture of the payment
+  seller_receivable_breakdown: SellerReceivableBreakdown;
+  links: Link[];
+  id: string; // PayPal transaction ID
+  status: string; // Transaction status (e.g., 'COMPLETED')
+}
+
+
 
 async function getPaypalAccessToken() {
   if (!PAYPAL_CLIENT_ID || !PAYPAL_SECRET) {
@@ -208,21 +236,21 @@ const capturePayment = async (orderId: string) => {
   return captureData; // This will contain the payment capture details
 };
 
-const storeTransaction = async (paymentIntent: PayPalTransactionData) => {
+const storeTransaction = async (paymentIntent: PayPalTransactionResource) => {
   try {
     await connectToDatabase(); // Ensure DB connection
     const transaction = new Transaction({
       // Generate a unique transaction ID
-      paymentIntentId: paymentIntent.paymentIntentId,
+      paymentIntentId: paymentIntent.supplementary_data.related_ids.order_id,
       paymentProvider: 'paypal',
-      amount: parseFloat(paymentIntent.amount.total),
+      amount: parseFloat(paymentIntent.amount.value),
       currency: paymentIntent.amount.currency_code,
       status: paymentIntent.status,
       created: paymentIntent.create_time,
       paypal: {
         capture_id: paymentIntent.id,
         capture_status: paymentIntent.status,
-        fee: paymentIntent.paypal_fee,
+        fee: paymentIntent.seller_receivable_breakdown.paypal_fee.value,
       },
     });
 
