@@ -16,7 +16,7 @@ const AddAddressSection: React.FC<AddAddressSectionProps> = ({isMobile}) => {
                  bg-white text-white p-4 flex flex-col justify-between items-start
                   ${isMobile ? 'shadow-lg z-50' : ""}`}
             sx={{
-                width: isMobile ? "100%" : '80%',
+                width: isMobile ? "100%" : '40%',
                 height: "auto",
                 padding: "8px",
                 gap: "8px"

@@ -18,7 +18,7 @@ const TipOptions = () => {
             setCustomTip('');
             sessionStorage.removeItem('tipAmount');
             sessionStorage.removeItem('tipType');
-            if (amount !== 10) {
+            if (amount !== 3) {
                 setIsMostPopularDisabled(true);
             } else {
                 setIsMostPopularDisabled(false);
@@ -68,7 +68,7 @@ const TipOptions = () => {
 
     useEffect(() => {
         const checkMostPopular = () => {
-            if (selectedTip && selectedTip !== 10) {
+            if (selectedTip && selectedTip !== 3) {
                 setIsMostPopularDisabled(true)
             } else if (selectedTip !== undefined) {
                 setIsMostPopularDisabled(false)
@@ -91,7 +91,7 @@ const TipOptions = () => {
 
             {/* Tip Buttons */}
             <Box className={`flex mt-3 ${isMobileView ? 'gap-1' : 'gap-3'} justify-start`}>
-                {[5, 10, 20, "Other"].map((amount) => (
+                {[1, 3, 5, "Other"].map((amount) => (
                     <Button
                         key={amount}
                         variant="outlined"
@@ -109,7 +109,7 @@ const TipOptions = () => {
                         {selectedTip === amount && selectedTip !== 'Other' && (
                             <CloseIcon className="text-sm text-tomato ml-2" />
                         )}
-                        {amount === 10 && !isMostPopularDisabled && (
+                        {amount === 3 && !isMostPopularDisabled && (
                             <Box
                                 className="absolute mt-7 w-full max-w-3xl bg-orange-500 text-white text-[9px] px-0 py-0 space-x-2"
                                 sx={{ borderRadius: 0 }}

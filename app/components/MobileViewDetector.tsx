@@ -7,7 +7,7 @@ import { setMobileView } from "../redux/slices/mobileSlice";
 
 const MobileViewDetector: React.FC = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const dispatch = useDispatch();
 
   useEffect(() => {

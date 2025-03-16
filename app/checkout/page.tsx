@@ -172,7 +172,7 @@ const Checkout = () => {
                   alt="Delivery Man"
                   width={300} // Increased size for visibility
                   height={100}
-                  className="object-cover mt-4" // Adds margin-top
+                  className="object-cover mt-4 ml-2" // Adds margin-top
                 />
               </Box>
             )

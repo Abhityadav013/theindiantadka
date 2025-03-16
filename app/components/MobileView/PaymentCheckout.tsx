@@ -1,16 +1,32 @@
-import { RootState } from '@/app/redux/reducers';
 import { Box, Typography, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
 
 interface PaymentCheckoutProps {
   scrollToBillDetails: () => void; // Function to scroll to Bill Details
 }
 
 const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({ scrollToBillDetails }) => {
-  const { cartTotal } = useSelector((state: RootState) => state.cart);
   const router = useRouter();
+  const [cartTotal, setCartTotal] = useState<number | null>(null);
+
+  useEffect(() => {
+    const checkCartTotalAmount = () => {
+      const cartAmount = sessionStorage.getItem('cartTotalAmount');
+      if (cartAmount) {
+        setCartTotal(Number(cartAmount));
+      }
+    };
+
+    // Initial load of the tip from sessionStorage
+    checkCartTotalAmount();
+
+    // Set up interval to check sessionStorage every 500ms
+    const intervalId = setInterval(checkCartTotalAmount, 5);
+
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, [cartTotal]);
 
   // PayPal Button
   const handlePayPalPayment = () => {
