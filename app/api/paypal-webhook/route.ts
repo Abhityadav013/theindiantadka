@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
 import { connectToDatabase } from '@/app/libs/mongodb';
 import Transaction from '@/app/models/Transaction';
 
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 const PAYPAL_SECRET = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_SECRET;
+const PAYPAL_BASE_URL =
+  process.env.NEXT_PUBLIC_PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com';
 
+  interface PayPalAmount {
+    value: string;
+    currency_code: string;
+  }
 interface PayPalTransactionData {
   id: string; // PayPal transaction ID
   status: string; // Status of the payment (e.g., 'COMPLETED', 'PENDING', 'DENIED')
@@ -17,79 +22,111 @@ interface PayPalTransactionData {
   custom?: string; // Optional custom metadata, if provided
   payer_id: string; // PayPal payer ID
   payment_method: string; // Payment method used (e.g., 'paypal', 'credit_card')
-  links: Array<{
-    href: string;
-    rel: string;
-    method: string;
-  }>; // PayPal links (usually for follow-up actions like approval, cancel, etc.)
+  paymentIntentId:string;
+  paypal_fee: PayPalAmount;
 }
 
-async function fetchPayPalPublicKey() {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_PAYPAL_BASE_URL}/v1/notifications/certs`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Basic ${Buffer.from(
-          `${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`,
-        ).toString('base64')}`,
-      },
-    },
-  );
-  console.log(':::::::::::::::PAYPAL Transaction Started::::::::::', response);
-
-  if (!response.ok) {
-    throw new Error('Failed to retrieve PayPal public key');
+async function getPaypalAccessToken() {
+  if (!PAYPAL_CLIENT_ID || !PAYPAL_SECRET) {
+    throw new Error('PayPal credentials are not properly configured.');
   }
 
-  const data = await response.json();
-  const publicKey = data.certs[0].cert; // Extract the first certificate's public key
+  const basicAuth = Buffer.from(
+    `${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`,
+  ).toString('base64');
 
-  return publicKey; // This is the PEM formatted public key
+  const tokenResponse = await fetch(`${PAYPAL_BASE_URL}/v1/oauth2/token`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: `Basic ${basicAuth}`,
+    },
+    body: 'grant_type=client_credentials',
+  });
+
+  if (!tokenResponse.ok) {
+    throw new Error(
+      'Failed to fetch access token. Status: ${tokenResponse.status}',
+    );
+  }
+
+  const tokenData = await tokenResponse.json();
+  if (!tokenData.access_token) {
+    throw new Error('No access token received from PayPal.');
+  }
+
+  return { accessToken: tokenData.access_token, PAYPAL_BASE_URL };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function verifyWebhookSignature(payload: any, headers: Headers) {
+  const transmission_id = headers.get('paypal-transmission-id');
+  const transmission_time = headers.get('paypal-transmission-time');
+  const cert_url = headers.get('paypal-cert-url');
+  const auth_algo = headers.get('paypal-auth-algo');
+  const transmission_sig = headers.get('paypal-transmission-sig');
+
+  const webhookId = process.env.PAYPAL_WEBHOOK_ID;
+  if (!webhookId) {
+    throw new Error('PAYPAL_WEBHOOK_ID is not configured.');
+  }
+
+  const verifyPayload = {
+    transmission_id,
+    transmission_time,
+    cert_url,
+    auth_algo,
+    transmission_sig,
+    webhook_id: webhookId,
+    webhook_event: payload,
+  };
+
+  const { accessToken, PAYPAL_BASE_URL } = await getPaypalAccessToken();
+
+  const verifyResponse = await fetch(
+    `${PAYPAL_BASE_URL}/v1/notifications/verify-webhook-signature`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(verifyPayload),
+    },
+  );
+
+  if (!verifyResponse.ok) {
+    throw new Error(
+      `Webhook signature verification failed. Status: ${verifyResponse.status}`,
+    );
+  }
+
+  const verifyData = await verifyResponse.json();
+  // Check if verification_status is 'SUCCESS'
+  return verifyData.verification_status === 'SUCCESS';
 }
 
 export async function POST(request: NextRequest) {
   console.log(':::::::::::::::PAYPAL Transaction Started::::::::::');
   try {
-    const PAYPAL_CLIENT_SECRET = (await fetchPayPalPublicKey()) as string;
     // Use request.text() to get the raw body as a string
     const body = await request.text();
-    console.log(':::::::::::::::PAYPAL Transaction Step 1::::::::::',PAYPAL_CLIENT_SECRET);
+    const payload = await request.json();
+    console.log('Webhook payload received:', payload);
 
-    // PayPal webhook signature verification
-    const paypalSignature = request.headers.get('paypal-auth-algo'); // Used for identifying the signature algorithm
-    const paypalTransmissionSig = request.headers.get(
-      'paypal-transmission-sig',
-    ); // Signature itself
-    console.log(
-      ':::::::::::::::PAYPAL Transaction Step 2::::::::::',
-      paypalSignature,
-      paypalTransmissionSig,
-    );
-
-    if (!paypalSignature || !paypalTransmissionSig) {
+    const isVerified = await verifyWebhookSignature(payload, request.headers);
+    if (!isVerified) {
+      console.error('Webhook signature verification failed.');
       return NextResponse.json(
-        { error: 'Missing PayPal headers' },
+        { error: 'Invalid webhook signature' },
         { status: 400 },
       );
     }
 
-    console.log(':::::::::::::::PAYPAL Transaction Step 3::::::::::');
-    const verifySignature = verifyPayPalSignature(
-      body,
-      paypalSignature,
-      paypalTransmissionSig,
-      PAYPAL_CLIENT_SECRET,
-    );
-
     console.log(
       ':::::::::::::::PAYPAL Transaction Step 4::::::::::',
-      verifySignature,
+      isVerified,
     );
-    if (!verifySignature) {
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
-    }
 
     // Parse the webhook event
     const event = JSON.parse(body);
@@ -100,14 +137,14 @@ export async function POST(request: NextRequest) {
 
     // Handle the event based on its type
     switch (event.event_type) {
-      case 'PAYMENT.SALE.COMPLETED':
-        await storeTransaction(event.resource, 'succeeded');
+      case 'PAYMENT.CAPTURE.COMPLETED':
+        await storeTransaction(event.resource);
         break;
       case 'PAYMENT.SALE.PENDING':
-        await storeTransaction(event.resource, 'pending');
+        await storeTransaction(event.resource);
         break;
       case 'PAYMENT.SALE.DENIED':
-        await storeTransaction(event.resource, 'failed');
+        await storeTransaction(event.resource);
         break;
       default:
         console.log(`Unhandled event type: ${event.event_type}`);
@@ -123,83 +160,29 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function verifyPayPalSignature(
-  body: string,
-  paypalSignature: string, // Signature algorithm, e.g., SHA256withRSA
-  paypalTransmissionSig: string, // The actual signature sent by PayPal
-  PAYPAL_PUBLIC_KEY: string,
-): boolean {
-  // In PayPal's case, this would be an RSA signature verification.
-  // For RSA, you need to use PayPal's public key to verify the transmission signature.
-
-  if (paypalSignature !== 'SHA256withRSA') {
-    // For now, we only handle SHA256withRSA, but you can extend this to handle other algorithms
-    console.error('Unsupported signature algorithm:', paypalSignature);
-    return false;
-  }
-
-  // Create the RSA signature verification
-  const verify = crypto.createVerify('RSA-SHA256');
-  verify.update(body);
-  verify.end();
-
-  // Verify the signature using the public key provided by PayPal (ensure this key is stored securely)
-  const isValid = verify.verify(
-    PAYPAL_PUBLIC_KEY,
-    paypalTransmissionSig,
-    'base64',
-  );
-  return isValid;
-}
 
 const storeTransaction = async (
-  transactionData: PayPalTransactionData,
-  status: string,
+  paymentIntent: PayPalTransactionData,
 ) => {
-  const db = await connectToDatabase();
-  if (!db) {
-    console.error('Database connection failed');
-    return;
-  }
-
   try {
-    const transaction = {
-      paymentProvider: 'PayPal',
-      paymentIntentId: transactionData.id, // PayPal's transaction ID
-      amount: transactionData.amount.total,
-      currency: transactionData.amount.currency_code,
-      status,
-      created: new Date(transactionData.create_time), // Convert timestamp
-      metadata: transactionData.custom, // If you have metadata
-    };
+    await connectToDatabase();  // Ensure DB connection
+    const transaction = new Transaction({ // Generate a unique transaction ID
+      paymentIntentId:paymentIntent.paymentIntentId,
+      paymentProvider: 'paypal',
+      amount: parseFloat(paymentIntent.amount.total),
+      currency: paymentIntent.amount.currency_code,
+      status: paymentIntent.status,
+      created: paymentIntent.create_time,
+      paypal: {
+        capture_id:paymentIntent.id,
+        capture_status: paymentIntent.status,
+        fee: paymentIntent.paypal_fee,
+      },
+    }); 
 
-    const collection = db.collection('OrderTransaction');
-    await collection.insertOne(transaction);
-    console.log('Transaction inserted successfully:', transaction);
-  } catch (error) {
-    console.error('Error inserting transaction:', error);
-  }
-
-  try {
-    await connectToDatabase(); // Ensure DB connection
-    const transaction = new Transaction({
-      // Generate a unique transaction ID
-      paymentProvider: 'PayPal',
-      paymentIntentId: transactionData.id,
-      amount: transactionData.amount.total, // Convert from cents
-      currency: transactionData.amount.currency_code,
-      status,
-      created: new Date(transactionData.create_time), // Convert timestamp
-      metadata: transactionData.custom,
-    });
-
-    console.log(
-      ':::::::::::::::Order Transaction Model Created Completed::::::::::',
-    );
     // Save the transaction to the database
     await transaction.save();
 
-    console.log('Transaction inserted successfully:', transaction);
   } catch (error) {
     console.error('Error inserting transaction:', error);
   }
