@@ -110,7 +110,6 @@ export async function POST(request: NextRequest) {
   console.log(':::::::::::::::PAYPAL Transaction Started::::::::::');
   try {
     // Use request.text() to get the raw body as a string
-    const body = await request.text();
     const payload = await request.json();
     console.log('Webhook payload received:', payload);
 
@@ -129,7 +128,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Parse the webhook event
-    const event = JSON.parse(body);
+    const event = JSON.parse(payload);
     console.log(
       ':::::::::::::::PAYPAL Transaction Step 5::::::::::',
       event.event_type,
