@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { connectToDatabase } from '@/app/libs/mongodb';
+import Transaction from '@/app/models/Transaction';
 
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET as string;
 
@@ -23,6 +24,7 @@ interface PayPalTransactionData {
 }
 
 export async function POST(request: NextRequest) {
+  console.log(':::::::::::::::PAYPAL Transaction Started::::::::::')
   try {
     // Use request.text() to get the raw body as a string
     const body = await request.text();
@@ -116,4 +118,26 @@ const storeTransaction = async (
   } catch (error) {
     console.error('Error inserting transaction:', error);
   }
+
+    try {
+  
+      await connectToDatabase();  // Ensure DB connection
+      const transaction = new Transaction({ // Generate a unique transaction ID
+        paymentProvider: 'PayPal',
+        paymentIntentId: transactionData.id,
+        amount: transactionData.amount.total,  // Convert from cents
+        currency: transactionData.amount.currency_code,
+        status,
+        created:new Date(transactionData.create_time), // Convert timestamp
+        metadata:transactionData.custom,
+      });
+  
+      console.log(':::::::::::::::Order Transaction Model Created Completed::::::::::')
+      // Save the transaction to the database
+      await transaction.save();
+      
+      console.log('Transaction inserted successfully:', transaction);
+    } catch (error) {
+      console.error('Error inserting transaction:', error);
+    }
 };

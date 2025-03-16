@@ -7,7 +7,6 @@ const stripe = new Stripe(process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY as string);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
 
 export async function POST(req: Request) {
-  console.log(':::::::::::::::WebHook Endpoint request Recieved::::::::::')
   const sig = req.headers.get('stripe-signature') as string;
   const body = await req.text();
 
@@ -24,7 +23,6 @@ export async function POST(req: Request) {
   // Handle the event types
   switch (event.type) {
     case 'payment_intent.succeeded':
-      console.log(':::::::::::::::WebHook Event succeeded::::::::::')
       const paymentIntentSucceeded = event.data.object as Stripe.PaymentIntent;
       await storeTransaction(paymentIntentSucceeded, 'succeeded');
       break;
@@ -55,7 +53,6 @@ const storeTransaction = async (
   paymentIntent: Stripe.PaymentIntent,
   status: string
 ) => {
-  console.log(':::::::::::::::Order Transaction Started::::::::::')
   try {
 
     await connectToDatabase();  // Ensure DB connection
@@ -69,11 +66,9 @@ const storeTransaction = async (
       metadata: paymentIntent.metadata,
     });
 
-    console.log(':::::::::::::::Order Transaction Model Created Completed::::::::::')
     // Save the transaction to the database
     await transaction.save();
-    
-    console.log('Transaction inserted successfully:', transaction);
+
   } catch (error) {
     console.error('Error inserting transaction:', error);
   }
