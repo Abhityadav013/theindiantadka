@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Parse the webhook event
-    const event = JSON.parse(payload);
+    const event = payload
     console.log(
       ':::::::::::::::PAYPAL Transaction Step 5::::::::::',
       event.event_type,
