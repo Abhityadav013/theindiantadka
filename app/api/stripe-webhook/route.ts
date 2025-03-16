@@ -61,10 +61,11 @@ const storeTransaction = async (
   }
 
   try {
+    // Define the transaction object
     const transaction = {
       paymentProvider: 'Stripe', 
       paymentIntentId: paymentIntent.id,
-      amount: paymentIntent.amount_received /100,
+      amount: paymentIntent.amount_received / 100,
       currency: paymentIntent.currency,
       status,
       created: new Date(paymentIntent.created * 1000), // Convert timestamp
@@ -72,9 +73,19 @@ const storeTransaction = async (
     };
 
     const collection = db.collection('OrderTransaction');
+
+    // Check if a transaction with the same paymentIntentId already exists
+    const existingTransaction = await collection.findOne({ paymentIntentId: paymentIntent.id });
+    if (existingTransaction) {
+      console.log('Transaction already exists, skipping insertion');
+      return; // Skip the insertion if the transaction exists
+    }
+
+    // Insert the new transaction
     await collection.insertOne(transaction);
     console.log('Transaction inserted successfully:', transaction);
   } catch (error) {
     console.error('Error inserting transaction:', error);
   }
 };
+
