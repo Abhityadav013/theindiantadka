@@ -18,6 +18,7 @@ import ReviewOrderSection from '../components/MobileView/ReviewOrderSection';
 import TipOptions from '../components/MobileView/TipOptions';
 import CartHistory from '../components/CartHistory';
 import Image from 'next/image';
+import EmptyCart from '../components/EmptyCart';
 
 const images = [
   "https://testing.indiantadka.eu/assets/DiscountImage1.jpg",
@@ -63,7 +64,9 @@ const Checkout = () => {
   }
 
   if (cart.length === 0) {
-    return <FakeSection />;
+    return isMobile ? <FakeSection /> : <div className="flex justify-center mt-10">
+      <EmptyCart />
+    </div>;
   } else {
     return (
       <Box> {/* Add padding to the bottom */}
