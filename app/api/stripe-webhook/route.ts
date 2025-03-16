@@ -1,3 +1,4 @@
+import { connectToDatabase } from '@/app/libs/mongodb';
 import Transaction from '@/app/models/Transaction';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
@@ -56,6 +57,8 @@ const storeTransaction = async (
 ) => {
   console.log(':::::::::::::::Order Transaction Started::::::::::')
   try {
+
+    await connectToDatabase();  // Ensure DB connection
     const transaction = new Transaction({ // Generate a unique transaction ID
       paymentProvider: 'Stripe',
       paymentIntentId: paymentIntent.id,
