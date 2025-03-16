@@ -1,4 +1,4 @@
-import { connectToDatabase } from '@/app/libs/mongodb';
+import Transaction from '@/app/models/Transaction';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
@@ -52,40 +52,26 @@ export async function GET(req: Request) {
 
 const storeTransaction = async (
   paymentIntent: Stripe.PaymentIntent,
-  status: string,
+  status: string
 ) => {
-  const db = await connectToDatabase(); // Ensure DB connection
-  if (!db) {
-    console.error('Database connection failed');
-    return;
-  }
-
+  console.log(':::::::::::::::Order Transaction Started::::::::::')
   try {
-    // Define the transaction object
-    const transaction = {
-      paymentProvider: 'Stripe', 
+    const transaction = new Transaction({
+      paymentProvider: 'Stripe',
       paymentIntentId: paymentIntent.id,
-      amount: paymentIntent.amount_received / 100,
+      amount: paymentIntent.amount_received / 100,  // Convert from cents
       currency: paymentIntent.currency,
       status,
       created: new Date(paymentIntent.created * 1000), // Convert timestamp
       metadata: paymentIntent.metadata,
-    };
+    });
 
-    const collection = db.collection('OrderTransaction');
-
-    // Check if a transaction with the same paymentIntentId already exists
-    const existingTransaction = await collection.findOne({ paymentIntentId: paymentIntent.id });
-    if (existingTransaction) {
-      console.log('Transaction already exists, skipping insertion');
-      return; // Skip the insertion if the transaction exists
-    }
-
-    // Insert the new transaction
-    await collection.insertOne(transaction);
+    console.log(':::::::::::::::Order Transaction Model Created Completed::::::::::')
+    // Save the transaction to the database
+    await transaction.save();
+    
     console.log('Transaction inserted successfully:', transaction);
   } catch (error) {
     console.error('Error inserting transaction:', error);
   }
 };
-
