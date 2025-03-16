@@ -135,7 +135,6 @@ async function verifyWebhookSignature(payload: any, headers: Headers) {
 }
 
 export async function POST(request: NextRequest) {
-  console.log(':::::::::::::::PAYPAL Transaction Started::::::::::');
   try {
     // Use request.json() to get the parsed body directly
     const payload = await request.json();
@@ -150,18 +149,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(
-      ':::::::::::::::PAYPAL Transaction Step 4::::::::::',
-      isVerified,
-    );
-
     // Parse the webhook event
     const event = payload;
-    console.log(
-      ':::::::::::::::PAYPAL Transaction Step 5::::::::::',
-      event.event_type,
-    );
-
     // Handle the event based on its type
     switch (event.event_type) {
       case 'PAYMENT.CAPTURE.COMPLETED':
@@ -198,8 +187,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-const handleOrderApproved = async (orderData: { id: string }) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const handleOrderApproved = async (orderData: any) => {
   try {
+    console.log(':::::::::::::::handleOrderApproved::::::::::',orderData)
     // When an order is approved, you need to capture the payment
     const orderId = orderData.id; // Order ID from the event
     const captureResponse = await capturePayment(orderId);
@@ -227,6 +218,8 @@ const capturePayment = async (orderId: string) => {
       },
     },
   );
+
+  console.log(':::::::::::::::captureResponse::::::::::',captureResponse)
 
   if (!captureResponse.ok) {
     throw new Error(`Payment capture failed: ${captureResponse.status}`);
