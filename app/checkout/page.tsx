@@ -17,13 +17,29 @@ import PaymentCheckout from '../components/MobileView/PaymentCheckout';
 import ReviewOrderSection from '../components/MobileView/ReviewOrderSection';
 import TipOptions from '../components/MobileView/TipOptions';
 import CartHistory from '../components/CartHistory';
+import Image from 'next/image';
+
+const images = [
+  "https://testing.indiantadka.eu/assets/DiscountImage1.jpg",
+  "https://testing.indiantadka.eu/assets/DiscountImage2.jpg",
+  "https://testing.indiantadka.eu/assets/DiscountImage3.jpg",
+];
 
 const Checkout = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
   const { userAddress } = useSelector((state: RootState) => state.address);
   const { isMobile } = useSelector((state: RootState) => state.mobile);
   const billDetailsRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 3000); // Change image every 3 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   const scrollToBillDetails = () => {
     billDetailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -65,32 +81,100 @@ const Checkout = () => {
                 </div>
               )
           }
-          <Box sx={{marginBottom:'20px'}}>
+          <Box
+            sx={{
+              ...(!isMobile && {
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'start',
+              }),
+              marginBottom: '20px',
+            }}
+          >
             <Box>
-              <RestroSuggestion />
+              <Box>
+                <RestroSuggestion />
+              </Box>
+              <Box> {/* Add margin to ensure CartItem is below CartSection */}
+                <TipOptions />
+              </Box>
+              <Box ref={billDetailsRef}> {/* Add margin to ensure CartItem is below CartSection */}
+                <BillDetails />
+              </Box>
+              <Box>
+                <ReviewOrderSection />
+              </Box>
+              <Box>
+                {
+                  userAddress?.length === 0 ?
+                    <AddAddressSection isMobile={isMobile} />
+                    :
+                    <>
+                      <AddressSection userAddress={userAddress} />
+                      <PaymentCheckout scrollToBillDetails={scrollToBillDetails} />
+                    </>}
+              </Box>
             </Box>
-            <Box> {/* Add margin to ensure CartItem is below CartSection */}
-              <TipOptions />
-            </Box>
-            <Box ref={billDetailsRef}> {/* Add margin to ensure CartItem is below CartSection */}
-              <BillDetails />
-            </Box>
-            <Box>
-              <ReviewOrderSection />
-            </Box>
-            <Box>
-            </Box>
-            <Box>
-              {
-                userAddress?.length === 0 ?
-                  <AddAddressSection isMobile={isMobile} />
-                  :
-                  <>
-                    <AddressSection userAddress={userAddress} />
-                    <PaymentCheckout scrollToBillDetails={scrollToBillDetails} />
-                  </>}
-            </Box>
+
+
+
           </Box>
+          {
+            !isMobile && (
+              <Box
+                sx={{
+                  flexShrink: 0,
+                  marginLeft: "auto",
+                  position: "relative",
+                  width: 350,
+                  height: '100vh',
+                  overflow: "hidden",
+                  marginTop: "85px", // Adds space from the top
+                  display: "flex",
+                  flexDirection: "column", // Stacks slideshow & image vertically
+                  alignItems: "center", // Centers the delivery image
+                }}
+              >
+                {/* Slideshow */}
+                <Box
+                  sx={{
+                    width: "100%",
+                    height: "100%", // Set a fixed height
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                >
+                  {images.map((img, index) => (
+                    <Image
+                      key={index}
+                      src={img}
+                      alt={`Discount ${index + 1}`}
+                      width={350}
+                      height={350}
+                      className="object-cover transition-opacity duration-1000"
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        opacity: index === currentIndex ? 1 : 0, // Show only the active image
+                        transition: "opacity 1s ease-in-out",
+                      }}
+                    />
+                  ))}
+                </Box>
+
+                {/* Delivery Man Image (Placed below slideshow) */}
+                <Image
+                  src="https://testing.indiantadka.eu/assets/deliveryMan.gif"
+                  alt="Delivery Man"
+                  width={300} // Increased size for visibility
+                  height={100}
+                  className="object-cover mt-4" // Adds margin-top
+                />
+              </Box>
+            )
+          }
+
         </Box>
       </Box>
     );
