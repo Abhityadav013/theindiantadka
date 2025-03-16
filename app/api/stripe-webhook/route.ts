@@ -6,6 +6,7 @@ const stripe = new Stripe(process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY as string);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
 
 export async function POST(req: Request) {
+  console.log(':::::::::::::::WebHook Endpoint request Recieved::::::::::')
   const sig = req.headers.get('stripe-signature') as string;
   const body = await req.text();
 
@@ -22,6 +23,7 @@ export async function POST(req: Request) {
   // Handle the event types
   switch (event.type) {
     case 'payment_intent.succeeded':
+      console.log(':::::::::::::::WebHook Event succeeded::::::::::')
       const paymentIntentSucceeded = event.data.object as Stripe.PaymentIntent;
       await storeTransaction(paymentIntentSucceeded, 'succeeded');
       break;
@@ -35,6 +37,18 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ received: true });
 }
+
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const verify = url.searchParams.get('verify');
+
+  if (verify === 'true') {
+    return NextResponse.json({ message: 'Webhook verified' });
+  }
+
+  return NextResponse.json({ message: 'Webhook is live' });
+}
+
 
 const storeTransaction = async (
   paymentIntent: Stripe.PaymentIntent,
