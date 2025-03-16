@@ -138,7 +138,6 @@ export async function POST(request: NextRequest) {
   try {
     // Use request.json() to get the parsed body directly
     const payload = await request.json();
-    console.log('Webhook payload received:', payload);
 
     const isVerified = await verifyWebhookSignature(payload, request.headers);
     if (!isVerified) {
@@ -190,23 +189,42 @@ export async function POST(request: NextRequest) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleOrderApproved = async (orderData: any) => {
   try {
-    console.log(':::::::::::::::handleOrderApproved::::::::::',orderData)
     // When an order is approved, you need to capture the payment
     const orderId = orderData.id; // Order ID from the event
     const captureResponse = await capturePayment(orderId);
 
     // You can now store the captured payment transaction in the database
     await storeTransaction(captureResponse);
-
-    console.log('Payment successfully captured:', captureResponse);
   } catch (error) {
     console.error('Error capturing payment:', error);
   }
 };
 
+const getOrderDetails =async(orderId: string, accessToken: string) =>{
+  const response = await fetch(`https://api.sandbox.paypal.com/v2/checkout/orders/${orderId}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  const data = await response.json();
+  return data;
+}
+
+
 const capturePayment = async (orderId: string) => {
   // Call the PayPal API to capture the payment using the order ID
   const { accessToken } = await getPaypalAccessToken();
+
+  const orderDetails = await getOrderDetails(orderId, accessToken);
+
+  // Check if the order is already captured
+  if (orderDetails.status === 'COMPLETED') {
+    console.log('Order already captured. Skipping capture.');
+    return;
+  }
 
   const captureResponse = await fetch(
     `${PAYPAL_BASE_URL}/v2/checkout/orders/${orderId}/capture`,
@@ -218,8 +236,6 @@ const capturePayment = async (orderId: string) => {
       },
     },
   );
-
-  console.log(':::::::::::::::captureResponse::::::::::',captureResponse)
 
   if (!captureResponse.ok) {
     throw new Error(`Payment capture failed: ${captureResponse.status}`);
