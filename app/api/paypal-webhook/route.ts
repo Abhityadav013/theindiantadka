@@ -7,10 +7,10 @@ const PAYPAL_SECRET = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_SECRET;
 const PAYPAL_BASE_URL =
   process.env.NEXT_PUBLIC_PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com';
 
-  interface PayPalAmount {
-    value: string;
-    currency_code: string;
-  }
+interface PayPalAmount {
+  value: string;
+  currency_code: string;
+}
 interface PayPalTransactionData {
   id: string; // PayPal transaction ID
   status: string; // Status of the payment (e.g., 'COMPLETED', 'PENDING', 'DENIED')
@@ -22,7 +22,7 @@ interface PayPalTransactionData {
   custom?: string; // Optional custom metadata, if provided
   payer_id: string; // PayPal payer ID
   payment_method: string; // Payment method used (e.g., 'paypal', 'credit_card')
-  paymentIntentId:string;
+  paymentIntentId: string;
   paypal_fee: PayPalAmount;
 }
 
@@ -109,7 +109,7 @@ async function verifyWebhookSignature(payload: any, headers: Headers) {
 export async function POST(request: NextRequest) {
   console.log(':::::::::::::::PAYPAL Transaction Started::::::::::');
   try {
-    // Use request.text() to get the raw body as a string
+    // Use request.json() to get the parsed body directly
     const payload = await request.json();
     console.log('Webhook payload received:', payload);
 
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Parse the webhook event
-    const event = payload
+    const event = payload;
     console.log(
       ':::::::::::::::PAYPAL Transaction Step 5::::::::::',
       event.event_type,
@@ -137,14 +137,25 @@ export async function POST(request: NextRequest) {
     // Handle the event based on its type
     switch (event.event_type) {
       case 'PAYMENT.CAPTURE.COMPLETED':
+        // When payment capture is completed, store the transaction
         await storeTransaction(event.resource);
         break;
-      case 'PAYMENT.SALE.PENDING':
+
+      case 'PAYMENT.CAPTURE.FAILED':
+        // Store failed transaction details
         await storeTransaction(event.resource);
         break;
-      case 'PAYMENT.SALE.DENIED':
+
+      case 'PAYMENT.CAPTURE.DENIED':
+        // Store denied transaction details
         await storeTransaction(event.resource);
         break;
+
+      case 'CHECKOUT.ORDER.APPROVED':
+        // When the order is approved, you need to capture the payment
+        await handleOrderApproved(event.resource);
+        break;
+
       default:
         console.log(`Unhandled event type: ${event.event_type}`);
     }
@@ -159,29 +170,64 @@ export async function POST(request: NextRequest) {
   }
 }
 
-
-const storeTransaction = async (
-  paymentIntent: PayPalTransactionData,
-) => {
+const handleOrderApproved = async (orderData: { id: string }) => {
   try {
-    await connectToDatabase();  // Ensure DB connection
-    const transaction = new Transaction({ // Generate a unique transaction ID
-      paymentIntentId:paymentIntent.paymentIntentId,
+    // When an order is approved, you need to capture the payment
+    const orderId = orderData.id; // Order ID from the event
+    const captureResponse = await capturePayment(orderId);
+
+    // You can now store the captured payment transaction in the database
+    await storeTransaction(captureResponse);
+
+    console.log('Payment successfully captured:', captureResponse);
+  } catch (error) {
+    console.error('Error capturing payment:', error);
+  }
+};
+
+const capturePayment = async (orderId: string) => {
+  // Call the PayPal API to capture the payment using the order ID
+  const { accessToken } = await getPaypalAccessToken();
+
+  const captureResponse = await fetch(
+    `${PAYPAL_BASE_URL}/v2/checkout/orders/${orderId}/capture`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  if (!captureResponse.ok) {
+    throw new Error(`Payment capture failed: ${captureResponse.status}`);
+  }
+
+  const captureData = await captureResponse.json();
+  return captureData; // This will contain the payment capture details
+};
+
+const storeTransaction = async (paymentIntent: PayPalTransactionData) => {
+  try {
+    await connectToDatabase(); // Ensure DB connection
+    const transaction = new Transaction({
+      // Generate a unique transaction ID
+      paymentIntentId: paymentIntent.paymentIntentId,
       paymentProvider: 'paypal',
       amount: parseFloat(paymentIntent.amount.total),
       currency: paymentIntent.amount.currency_code,
       status: paymentIntent.status,
       created: paymentIntent.create_time,
       paypal: {
-        capture_id:paymentIntent.id,
+        capture_id: paymentIntent.id,
         capture_status: paymentIntent.status,
         fee: paymentIntent.paypal_fee,
       },
-    }); 
+    });
 
     // Save the transaction to the database
     await transaction.save();
-
   } catch (error) {
     console.error('Error inserting transaction:', error);
   }
