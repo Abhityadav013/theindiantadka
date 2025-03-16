@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/react"
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google"; // Import Outfit font
 import "./globals.css"; // Import global styles
@@ -42,6 +43,7 @@ export default function RootLayout({
               <LoginDrawer />
             {/* Include MobileViewDetector */}
               {children}
+              <Analytics/>
             </ThemeProvider>
           </body>
         </html>
