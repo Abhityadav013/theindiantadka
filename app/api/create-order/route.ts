@@ -6,30 +6,36 @@ const PAYPAL_SECRET = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_SECRET;
 
 export async function POST(request: NextRequest) {
   try {
-    const { amount } = await request.json();
+    const { amount, order } = await request.json();
 
-    const response = await fetch(process.env.NEXT_PUBLIC_PAYPAL_BASE_URL + "/v2/checkout/orders", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`).toString('base64')}`,
-      },
-      body: JSON.stringify({
-        intent: 'CAPTURE',
-        purchase_units: [
-          {
-            amount: {
-              value: (amount / 100).toFixed(2), // PayPal uses dollars, so divide by 100 if you pass in cents
-              currency_code: 'USD',
-            },
-          },
-        ],
-        application_context: {
-          return_url: `http://localhost:3000/payment-success`,
-          cancel_url: `http://localhost:3000/payment-cancel`,
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_PAYPAL_BASE_URL + '/v2/checkout/orders',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${Buffer.from(
+            `${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`,
+          ).toString('base64')}`,
         },
-      }),
-    });
+        body: JSON.stringify({
+          intent: 'CAPTURE',
+          purchase_units: [
+            {
+              amount: {
+                value: (amount / 100).toFixed(2), // PayPal uses dollars, so divide by 100 if you pass in cents
+                currency_code: 'USD',
+              },
+              items: order,
+            },
+          ],
+          application_context: {
+            return_url: `http://localhost:3000/payment-success`,
+            cancel_url: `http://localhost:3000/payment-cancel`,
+          },
+        }),
+      },
+    );
 
     const data = await response.json();
 
@@ -40,6 +46,9 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('Error creating PayPal order:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 },
+    );
   }
 }

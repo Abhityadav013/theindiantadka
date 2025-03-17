@@ -2,18 +2,26 @@
 
 import React, { useEffect, useState } from 'react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
+import { Order } from '../utils/types/order_type';
 
-const PaypalComponent = ({ amount }: { amount: number }) => {
+interface PaypalComponentProps {
+    order: Order[];
+    amount:number
+  }
+
+const PaypalComponent:React.FC<PaypalComponentProps> = ({amount,order}) => {
     const [orderId, setOrderId] = useState<string | null>(null);
+
 
     useEffect(() => {
         // Create order on the server when the component mounts
         const createOrder = async () => {
             try {
+               
                 const response = await fetch('/api/create-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount }),
+                    body: JSON.stringify({ amount,order }),
                 });
                 const data = await response.json();
                
@@ -24,7 +32,7 @@ const PaypalComponent = ({ amount }: { amount: number }) => {
         };
 
         createOrder();
-    }, [amount]);
+    }, [amount,order]);
 
     if (!orderId) {
         return (
