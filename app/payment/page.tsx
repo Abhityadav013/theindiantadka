@@ -1,20 +1,19 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaypal, faStripe } from '@fortawesome/free-brands-svg-icons';
-import StripeComponent from '../components/StripeComponent';
-import { Button, Card, Typography, Stack } from '@mui/material';
-import { motion } from 'framer-motion';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faPaypal, faStripe } from '@fortawesome/free-brands-svg-icons';
+// import StripeComponent from '../components/StripeComponent';
+import {  Card, Typography } from '@mui/material';
 import { RootState } from '../redux/store';
 import { convertToSubcurrency } from '../utils/convertToSubCurrency';
 import PaypalComponent from '../components/PaypalComponent';
 import { Cart } from '../utils/types/cart_type';
 import { FoodItem } from '../utils/types/menu_type';
-import {  OrderItem } from '../utils/types/order_type';
+import { OrderItem } from '../utils/types/order_type';
 
 const Checkout = () => {
-  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'stripe'>('paypal');
+  // const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'stripe'>('paypal');
   const [amountInCents, setAmountInCents] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const isMobileView = useSelector((state: RootState) => state.mobile.isMobile); // Responsive state
@@ -63,11 +62,11 @@ const Checkout = () => {
       // If food item is found, add it to the accumulator
       if (foodItem) {
         accumulator.push({
-          id:cartItem.itemId,
+          id: cartItem.itemId,
           name: foodItem.itemName,
           quantity: cartItem.quantity,
           unit_amount: {
-            currency_code:'USD',
+            currency_code: 'USD',
             value: String((foodItem.price).toFixed(2))
           }// price based on quantity
         });
@@ -103,7 +102,7 @@ const Checkout = () => {
         </Typography>
 
         {/* Dynamic Button Layout: Stack on Mobile, Row on Desktop */}
-        <Stack direction={isMobileView ? 'column' : 'row'} spacing={2} className="my-4">
+        {/* <Stack direction={isMobileView ? 'column' : 'row'} spacing={2} className="my-4">
           <Button
             fullWidth={isMobileView}
             startIcon={<FontAwesomeIcon icon={faPaypal} />}
@@ -124,17 +123,16 @@ const Checkout = () => {
           >
             Pay with Stripe
           </Button>
-        </Stack>
+        </Stack> */}
 
         {/* Animated Payment Component */}
-        <motion.div
-          key={paymentMethod}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {paymentMethod === 'paypal' ? <PaypalComponent amount={amountInCents} order={order} /> : <StripeComponent amount={amountInCents} />}
-        </motion.div>
+
+        {
+            amountInCents > 0 && order.length > 0  && (
+              <PaypalComponent amount={amountInCents} order={order} />
+            )
+          }
+        {/* <StripeComponent amount={amountInCents} /> */}
       </Card>
     </div>
   );

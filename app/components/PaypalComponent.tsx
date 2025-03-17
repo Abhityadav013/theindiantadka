@@ -1,36 +1,51 @@
 'use client'
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
-import {  OrderItem } from '../utils/types/order_type';
+import { OrderItem } from '../utils/types/order_type';
 
 interface PaypalComponentProps {
     order: OrderItem[];
-    amount:number
-  }
+    amount: number
+}
 
-const PaypalComponent:React.FC<PaypalComponentProps> = ({amount,order}) => {
+const PaypalComponent: React.FC<PaypalComponentProps> = ({ amount, order }) => {
     const [orderId, setOrderId] = useState<string | null>(null);
+    const isOrderCreatedRef = useRef(false);
+    const amountRef = useRef(amount);
+    const orderRef = useRef(order);
+
     useEffect(() => {
-        // Create order on the server when the component mounts
+        // Track the latest values of amount and order
+        amountRef.current = amount;
+        orderRef.current = order;
+    }, [amount, order]); // Ensure that refs are updated with latest values
+    useEffect(() => {
+        // Create order on the server when the component mounts and when amount/order change
         const createOrder = async () => {
             try {
-               
                 const response = await fetch('/api/create-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount,order }),
+                    body: JSON.stringify({ amount: amountRef.current, order: orderRef.current }),
                 });
                 const data = await response.json();
-               
-                setOrderId(data.id);
+
+                if (response.ok) {
+                    setOrderId(data.id);
+                    isOrderCreatedRef.current = true; // Only set order created flag after successful response
+                } else {
+                    throw new Error(data.message || 'Failed to create order');
+                }
             } catch (error) {
                 console.error('Error creating PayPal order:', error);
             }
         };
 
-        createOrder();
-    }, [amount,order]);
+        if (!isOrderCreatedRef.current) {
+            createOrder();
+        }
+    }, []); // Empty dependency array ensures it runs once on mount
 
     if (!orderId) {
         return (
@@ -45,7 +60,7 @@ const PaypalComponent:React.FC<PaypalComponentProps> = ({amount,order}) => {
     }
 
     return (
-        <PayPalScriptProvider options={{clientId : process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || ''}}>
+        <PayPalScriptProvider options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '' }}>
             <div className="paypal-button-container">
                 <PayPalButtons
                     createOrder={(data, actions) => {
@@ -76,7 +91,7 @@ const PaypalComponent:React.FC<PaypalComponentProps> = ({amount,order}) => {
                         console.error('PayPal error:', err);
                         window.location.href = '/payment-cancel';
                     }}
-                    
+
                 />
 
             </div>
