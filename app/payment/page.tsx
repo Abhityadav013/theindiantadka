@@ -11,7 +11,7 @@ import { convertToSubcurrency } from '../utils/convertToSubCurrency';
 import PaypalComponent from '../components/PaypalComponent';
 import { Cart } from '../utils/types/cart_type';
 import { FoodItem } from '../utils/types/menu_type';
-import { Order } from '../utils/types/order_type';
+import {  OrderItem } from '../utils/types/order_type';
 
 const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'stripe'>('paypal');
@@ -19,7 +19,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const isMobileView = useSelector((state: RootState) => state.mobile.isMobile); // Responsive state
   const [cartTotal, setCartTotal] = useState<number>(0);
-  const [order, setOrder] = useState<Order[]>([]);
+  const [order, setOrder] = useState<OrderItem[]>([]);
   const { cart } = useSelector((state: RootState) => state.cart);
   const foodItems: FoodItem[] = useSelector((state: RootState) => state.menu.foodMenuItems);
 
@@ -57,17 +57,19 @@ const Checkout = () => {
   }, [cart, foodItems]); // Only depend on cart and foodItems
 
   const createOrder = (cart: Cart[], foodItems: FoodItem[]) => {
-    return cart.reduce((accumulator: Order[], cartItem) => {
+    return cart.reduce((accumulator: OrderItem[], cartItem) => {
       // Find the food item from foodItems array that matches the cart's itemId
       const foodItem = foodItems.find(item => item.id === cartItem.itemId);
-
       // If food item is found, add it to the accumulator
       if (foodItem) {
         accumulator.push({
-          id: foodItem.id,
-          itemName: foodItem.itemName,
+          id:cartItem.itemId,
+          name: foodItem.itemName,
           quantity: cartItem.quantity,
-          price: foodItem.price * cartItem.quantity // price based on quantity
+          unit_amount: {
+            currency_code:'USD',
+            value: String((foodItem.price).toFixed(2))
+          }// price based on quantity
         });
       }
 

@@ -42,7 +42,6 @@ const BillDetails = () => {
                 if (typeof distance !== 'boolean') {
                     setDeliveryFee(distance)
                 }
-                console.log("Distance from restaurant:", distance);
             } catch (error) {
                 console.error("Error parsing user location:", error);
             }
