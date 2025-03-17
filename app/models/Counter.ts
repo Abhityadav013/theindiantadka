@@ -5,6 +5,6 @@ const counterSchema = new mongoose.Schema({
   seq: { type: Number, default: 0 },     // Sequence value
 });
 
-const Counter = mongoose.models.Counter || mongoose.model('Counter', counterSchema);
+const Counter = mongoose.models.Counter || mongoose.model('CounterPaymentTest', counterSchema);
 
 export { Counter };

@@ -9,6 +9,9 @@ import { motion } from 'framer-motion';
 import { RootState } from '../redux/store';
 import { convertToSubcurrency } from '../utils/convertToSubCurrency';
 import PaypalComponent from '../components/PaypalComponent';
+import { Cart } from '../utils/types/cart_type';
+import { FoodItem } from '../utils/types/menu_type';
+import { Order } from '../utils/types/order_type';
 
 const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'stripe'>('paypal');
@@ -16,6 +19,9 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const isMobileView = useSelector((state: RootState) => state.mobile.isMobile); // Responsive state
   const [cartTotal, setCartTotal] = useState<number>(0);
+  const [order, setOrder] = useState<Order[]>([]);
+  const { cart } = useSelector((state: RootState) => state.cart);
+  const foodItems: FoodItem[] = useSelector((state: RootState) => state.menu.foodMenuItems);
 
   useEffect(() => {
     const checkCartTotalAmount = () => {
@@ -43,6 +49,33 @@ const Checkout = () => {
     fetchAmountInCents();
   }, [cartTotal]);  // This effect will run whenever 'amount' changes
 
+  useEffect(() => {
+    if (cart.length > 0 && foodItems.length > 0) {
+      const cartOrder = createOrder(cart, foodItems);
+      setOrder(cartOrder);
+    }
+  }, [cart, foodItems]); // Only depend on cart and foodItems
+
+  const createOrder = (cart: Cart[], foodItems: FoodItem[]) => {
+    return cart.reduce((accumulator: Order[], cartItem) => {
+      // Find the food item from foodItems array that matches the cart's itemId
+      const foodItem = foodItems.find(item => item.id === cartItem.itemId);
+
+      // If food item is found, add it to the accumulator
+      if (foodItem) {
+        accumulator.push({
+          id: foodItem.id,
+          itemName: foodItem.itemName,
+          quantity: cartItem.quantity,
+          price: foodItem.price * cartItem.quantity // price based on quantity
+        });
+      }
+
+      // Return the accumulator at the end of each iteration
+      return accumulator;
+    }, []); // Initialize the accumulator as an empty array
+  };
+
   if (!loading && amountInCents <= 0) {
     return (
       <div className="flex items-center justify-center">
@@ -57,6 +90,8 @@ const Checkout = () => {
       </div>
     );
   }
+
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
@@ -96,7 +131,7 @@ const Checkout = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {paymentMethod === 'paypal' ? <PaypalComponent amount={amountInCents} /> : <StripeComponent amount={amountInCents} />}
+          {paymentMethod === 'paypal' ? <PaypalComponent amount={amountInCents} order={order} /> : <StripeComponent amount={amountInCents} />}
         </motion.div>
       </Card>
     </div>

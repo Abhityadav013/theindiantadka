@@ -265,6 +265,9 @@ const storeTransaction = async (paymentIntent: PayPalTransactionResource) => {
 
     // Save the transaction to the database
     await transaction.save();
+    if(transaction.transactionId){
+      
+    }
   } catch (error) {
     console.error('Error inserting transaction:', error);
   }
