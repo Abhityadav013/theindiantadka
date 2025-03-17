@@ -2,17 +2,15 @@
 
 import React, { useEffect, useState } from 'react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
-import { Order } from '../utils/types/order_type';
+import {  OrderItem } from '../utils/types/order_type';
 
 interface PaypalComponentProps {
-    order: Order[];
+    order: OrderItem[];
     amount:number
   }
 
 const PaypalComponent:React.FC<PaypalComponentProps> = ({amount,order}) => {
     const [orderId, setOrderId] = useState<string | null>(null);
-
-
     useEffect(() => {
         // Create order on the server when the component mounts
         const createOrder = async () => {
