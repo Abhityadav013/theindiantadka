@@ -14,9 +14,8 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY)
 
 interface StripeComponentProps{
     amount:number,
-    createOrder:()=>void
 }
-const StripeComponent:React.FC<StripeComponentProps> = ({amount,createOrder}) => {
+const StripeComponent:React.FC<StripeComponentProps> = ({amount}) => {
     return (
         <div>
             <Elements
@@ -27,7 +26,7 @@ const StripeComponent:React.FC<StripeComponentProps> = ({amount,createOrder}) =>
                     currency: 'eur',
                     locale:'en',
                 }}>
-                <CheckoutPage amount={amount} createOrder={createOrder}/>
+                <CheckoutPage amount={amount}/>
             </Elements>
         </div>
     )

@@ -1,12 +1,11 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Card, Typography, Radio, RadioGroup, FormControlLabel, FormControl } from '@mui/material';
-import { AppDispatch, RootState } from '../redux/store';
+import { RootState } from '../redux/store';
 import { convertToSubcurrency } from '../utils/convertToSubCurrency';
 import StripeComponent from '../components/StripeComponent';
 import PaypalComponent from '../components/PaypalComponent';
-import { OrderType } from '../models/Order';
 import { Cart } from '../utils/types/cart_type';
 
 const Checkout = () => {
@@ -15,8 +14,7 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'stripe' | null>(null);
   const isMobileView = useSelector((state: RootState) => state.mobile.isMobile); // Responsive state
   const [cartTotal, setCartTotal] = useState<number>(0);
-  const cart:Cart[] = useSelector((state: RootState) => state.cart.cart);
-  const dispatch =useDispatch<AppDispatch>();
+  const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
 
   useEffect(() => {
     const checkCartTotalAmount = () => {
@@ -57,31 +55,6 @@ const Checkout = () => {
     setPaymentMethod(event.target.value as 'paypal' | 'stripe');
   };
 
-  const createOrder = async () => {
-    try {
-      const response = await fetch('/api/create-order-success', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderDetails: cart,
-          orderType: OrderType.ONLINE,
-          paymentMethod: 'PayPal'
-        }),
-      });
-
-      const data = await response.json();
-      console.log('response>>>>>>>',response)
-      console.log('data>>>>>>>',data)
-      if (response.ok) {
-        dispatch({ type: "cart/updateCartOrderCreatedSaga" });
-      } else {
-        throw new Error(data.message || 'Failed to create order');
-      }
-    } catch (error) {
-      console.error('Error creating PayPal order:', error);
-    }
-  }
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <Card className={`p-6 shadow-lg rounded-2xl bg-white ${isMobileView ? 'w-full max-w-sm' : 'w-full max-w-md'}`}>
@@ -113,13 +86,13 @@ const Checkout = () => {
         {/* Show PayPal or Stripe based on selection */}
         {
           paymentMethod === 'paypal' && amountInCents > 0 && cart.length > 0 && (
-            <PaypalComponent amount={amountInCents} createOrder={createOrder} />
+            <PaypalComponent amount={amountInCents} />
           )
         }
 
         {
           paymentMethod === 'stripe' && amountInCents > 0 && cart.length > 0 && (
-            <StripeComponent amount={amountInCents} createOrder={createOrder} />
+            <StripeComponent amount={amountInCents} />
           )
         }
       </Card>
