@@ -70,7 +70,7 @@ const BillDetails = () => {
     }, [deliveryTip]);
 
     const addTipToDelivery = () => {
-        sessionStorage.setItem('tipAmount', String(10));
+        sessionStorage.setItem('tipAmount', String(3));
     }
     const totalAmount = (cartTotal + Number(deliveryFee) + (deliveryTip ? Number(deliveryTip) : 0)).toFixed(2);
     useEffect(() => {

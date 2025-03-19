@@ -3,9 +3,14 @@ import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { Button, CircularProgress, Box, Typography } from '@mui/material';
+import {  CircularProgress, Box } from '@mui/material';
 
-const CheckoutPage = ({ amount }: { amount: number }) => {
+interface StripeCheckoutProps{
+    amount:number,
+    createOrder:()=>void
+}
+
+const CheckoutPage:React.FC<StripeCheckoutProps> = ({amount,createOrder}) => {
     const stripe = useStripe();
     const elements = useElements();
     const [errorMessage, setErrorMessage] = useState<string>();
@@ -26,6 +31,7 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
     }, [amount]);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        console.log('Stripe Payment')
         event.preventDefault();
         setLoading(true);
         if (!stripe || !elements) {
@@ -38,16 +44,19 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
             return;
         }
 
-        const { error } = await stripe.confirmPayment({
+        const response = await stripe.confirmPayment({
             elements,
             clientSecret,
             confirmParams: {
                 return_url: 'https://theindiantadka.vercel.app/payment-success',
             },
         });
-        if (error) {
-            setErrorMessage(error.message);
+        console.log('Stripe DOne',response)
+        if (response.error) {
+            setErrorMessage(response.error.message);
         } else {
+            console.log('Stripe DOne')
+            createOrder()
             // Payment successful logic here (e.g., redirect to success page)
         }
         setLoading(false);
@@ -63,27 +72,15 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
     }
 
     return (
-        <form onSubmit={handleSubmit} className={`p-4 rounded-md ${isMobileView ? 'max-w-sm w-full' : 'max-w-md w-full'}`}>
-            {clientSecret && <PaymentElement />}
-            {errorMessage && <Typography variant="body2" color="error" className="mt-2">{errorMessage}</Typography>}
-            <Box className="flex flex-col gap-4 mt-3">
-                <Button
-                    variant="contained"
-                    disabled={!stripe || loading}
-                    className={`w-full font-bold ${isMobileView ? 'text-lg py-3' : 'text-xl py-4'} ${loading ? 'bg-gray-400' : 'bg-black'}`}
-                >
-                    {!loading ? `Pay ${amount / 100} €` : "Processing..."}
-                </Button>
-                <Button
-                    variant="contained"
-                    color="error"
-                    disabled={!stripe || loading}
-                    className={`w-full font-bold ${isMobileView ? 'text-lg py-3' : 'text-xl py-4'}`}
-                >
-                    {!loading ? `Cancel` : "Processing..."}
-                </Button>
-            </Box>
-        </form>
+        <form onSubmit={handleSubmit} className={`p-2 rounded-md ${isMobileView ? 'max-w-sm w-full' : 'max-w-md w-full'}`}>
+        {clientSecret && <PaymentElement />}
+        {errorMessage && <div className="text-red-500 text-sm mt-2">{errorMessage}</div>}
+        <button 
+            disabled={!stripe || loading} 
+            className={`w-full p-4 mt-4 rounded-md font-bold ${isMobileView ? 'text-lg py-3' : 'text-xl py-4'} ${loading ? 'bg-gray-400' : 'bg-black text-white'}`}>
+            {!loading ? `Pay ${amount / 100} €` : "Processing..."}
+        </button>
+    </form>
     );
 };
 

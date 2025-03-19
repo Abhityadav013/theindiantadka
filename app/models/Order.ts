@@ -1,36 +1,42 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';  // uuid for generating unique orderId
-import { OrderCounter } from './CounterOrder';
+import Counter from './Counter';
 
 export const OrderSchemaName = "Order"; // Collection name
 
 // Define the structure of the Order Schema
+export enum OrderType{
+  ONLINE = 'ONLINE',
+  PICKUP='PICKUP'
+}
+
+export enum OrderStatus{
+  INPROGRESS = 'IN-PROGRESS',
+  PREPARING = 'PREPARING',
+  COOKED = 'COOKED',
+  DELIVERED = 'DELIVERED'
+}
 interface IOrder extends Document {
   orderId: string;  // Unique Order ID (UUID)
   displayId: string;  // Unique Display ID for the order
-  tableNumber?: number;  // Table number, required if it's not an online or pickup order
   orderDate: string;  // Order date (ISO string or Date format)
+  orderType: OrderType
   pickupOrder: boolean;  // Flag to identify pickup orders
   onlineOrder: boolean;  // Flag to identify online orders
-  address: {
-    place: string;
-    houseNumber: string;
-    postalCode: string;
-    street: string;
-    phoneNumber: string;
-  };  // Address for delivery
-  status: string;  // Status of the order
+  status: OrderStatus;  // Status of the order
   paymentMethod?: string;  // Optional payment method (cash, card, etc.)
   orderItems: Array<{
     itemId: string;
     itemName: string;
-    category: string;
     quantity: number;
-    price: number;
   }>;  // List of ordered items
+  orderAmount:{
+    orderTotal:number,
+    tipAmount?: number
+  }
 }
-
-const orderSchema = new Schema<IOrder>({
+export const TransactionSchemaName = "Transaction"; 
+const OrderSchema = new Schema<IOrder>({
   orderId: {
     type: String,  // UUID for orderId
     required: true,
@@ -39,12 +45,6 @@ const orderSchema = new Schema<IOrder>({
   displayId: {
     type: String,
     unique: true,  // Ensures the displayId is unique
-  },
-  tableNumber: {
-    type: Number,
-    required: function () {
-      return !(this.pickupOrder === true || this.onlineOrder === true); // Table number is required for in-store orders
-    },
   },
   orderDate: {
     type: String,
@@ -57,28 +57,6 @@ const orderSchema = new Schema<IOrder>({
   onlineOrder: {
     type: Boolean,
     required: false,
-  },
-  address: {
-    place: {
-      type: String,
-      required: false,
-    },
-    houseNumber: {
-      type: String,
-      required: false,
-    },
-    postalCode: {
-      type: String,
-      required: false,
-    },
-    street: {
-      type: String,
-      required: false,
-    },
-    phoneNumber: {
-      type: String,
-      required: false,
-    },
   },
   status: {
     type: String,
@@ -98,20 +76,16 @@ const orderSchema = new Schema<IOrder>({
         type: String,
         required: true,
       },
-      category: {
-        type: String,
-        required: true,
-      },
       quantity: {
-        type: Number,
-        required: true,
-      },
-      price: {
         type: Number,
         required: true,
       },
     },
   ],
+  orderAmount:{
+    type:Object,
+    required:true
+  }
 }, 
 {
   timestamps: true,  // Automatically add createdAt and updatedAt fields
@@ -119,23 +93,29 @@ const orderSchema = new Schema<IOrder>({
   collection: OrderSchemaName,
 });
 
-// Pre-save hook for generating displayId
-orderSchema.pre('save', async function (next) {
+OrderSchema.pre('save', async function (next) {
   if (this.isNew) {
-    // Generate displayId by incrementing the counter
-    const counter = await OrderCounter.findByIdAndUpdate(
-      { _id: 'orderId' },
-      { $inc: { seq: 1 } },
-      { new: true, upsert: true }
-    );
-    // Generate the displayId (e.g., "O00000001")
-    this.displayId = `O${String(counter.seq).padStart(8, '0')}`;
+    try {
+      // Get the counter for 'order' type and increment the sequence
+      const counter = await Counter.findOneAndUpdate(
+        { _id: 'order' },  // Find by the 'order' type
+        { $inc: { seq: 1 } },  // Increment the sequence
+        { new: true, upsert: true }  // Create if not found
+      );
+
+      // Generate the displayId (e.g., "O00000001")
+      this.displayId = `B${String(counter.seq).padStart(8, '0')}`;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err:any) {
+      console.error('Error generating displayId:', err);
+      next(err);
+    }
   }
   next();
 });
 
 // Remove _id from orderItems when converting to JSON
-orderSchema.set('toJSON', {
+OrderSchema.set('toJSON', {
   transform: (doc, ret) => {
     // Remove _id from each order item in the response
     ret.orderItems.forEach((item: { _id?: string }) => {
@@ -146,6 +126,6 @@ orderSchema.set('toJSON', {
 });
 
 // Create and export the Order model
-const Order = mongoose.model('OrderTest', orderSchema);
+const Order = mongoose?.models?.Order  || mongoose.model('Order', OrderSchema);
 
 export default Order;

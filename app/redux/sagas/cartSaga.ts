@@ -27,6 +27,7 @@ export const fetchCartItemsApi = async (): Promise<Cart[]> => {
   return response.data.data?.cart?.cartItems || [];
 };
 
+
 export const fetchCartItemsAddonsApi = async (): Promise<CartDescription[]> => {
   const response = await api.get(`${base_url}/cart-description`, {
     withCredentials: true,
@@ -35,10 +36,10 @@ export const fetchCartItemsAddonsApi = async (): Promise<CartDescription[]> => {
 };
 
 // Update cart items in API
-export const updateCartItemsApi = async (cart: Cart[]): Promise<Cart[]> => {
+export const updateCartItemsApi = async (cart: Cart[],isCartEmpty?:boolean): Promise<Cart[]> => {
   const response = await api.post(
     `${base_url}/cart`,
-    { cart },
+    { cart ,isCartEmpty},
     { withCredentials: true }
   );
   return response.data.data.cart.cartItems || [];
@@ -92,7 +93,22 @@ function* updateCartSaga() {
     yield put(updateCartStart()); // Start loading
     const cart: Cart[] = yield select((state: RootState) => state.cart.cart);
     // Call API to update car
-    const response: Cart[] = yield call(updateCartItemsApi, cart);
+    const response: Cart[] = yield call(updateCartItemsApi, cart,false);
+    yield put(updateCartSuccess(response)); // Dispatch success action
+  } catch (error: unknown) {
+    let errorMessage = "An unknown error occurred";
+    if (error && (error as ErrorType).message) {
+      errorMessage = (error as ErrorType).message; // Extract message from the error
+    }
+    yield put(updateCartFailure(errorMessage)); // Handle failure
+  }
+}
+function* updateCartOrderCreatedSaga() {
+  try {
+    yield put(updateCartStart()); // Start loading
+    const cart: Cart[] = yield select((state: RootState) => state.cart.cart);
+    // Call API to update car
+    const response: Cart[] = yield call(updateCartItemsApi, cart,true);
     yield put(updateCartSuccess(response)); // Dispatch success action
   } catch (error: unknown) {
     let errorMessage = "An unknown error occurred";
@@ -131,4 +147,5 @@ export function* watchCartActions() {
   yield takeLatest("cart/fetchCartDescriptionSaga", fetchCartDescriptionSaga);
   yield takeLatest("cart/updateCartItem", updateCartSaga);
   yield takeLatest("cart/updateCartDescriptionItem", updateCartDescriptionSaga);
+  yield takeLatest("cart/updateCartOrderCreatedSaga",updateCartOrderCreatedSaga)
 }

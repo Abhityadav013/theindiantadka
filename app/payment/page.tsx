@@ -1,26 +1,22 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faPaypal, faStripe } from '@fortawesome/free-brands-svg-icons';
-// import StripeComponent from '../components/StripeComponent';
-import {  Card, Typography } from '@mui/material';
-import { RootState } from '../redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { Card, Typography, Radio, RadioGroup, FormControlLabel, FormControl } from '@mui/material';
+import { AppDispatch, RootState } from '../redux/store';
 import { convertToSubcurrency } from '../utils/convertToSubCurrency';
+import StripeComponent from '../components/StripeComponent';
 import PaypalComponent from '../components/PaypalComponent';
+import { OrderType } from '../models/Order';
 import { Cart } from '../utils/types/cart_type';
-import { FoodItem } from '../utils/types/menu_type';
-import { OrderItem } from '../utils/types/order_type';
 
 const Checkout = () => {
-  // const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'stripe'>('paypal');
   const [amountInCents, setAmountInCents] = useState<number>(0);
   const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'stripe' | null>(null);
   const isMobileView = useSelector((state: RootState) => state.mobile.isMobile); // Responsive state
   const [cartTotal, setCartTotal] = useState<number>(0);
-  const [order, setOrder] = useState<OrderItem[]>([]);
-  const { cart } = useSelector((state: RootState) => state.cart);
-  const foodItems: FoodItem[] = useSelector((state: RootState) => state.menu.foodMenuItems);
+  const cart:Cart[] = useSelector((state: RootState) => state.cart.cart);
+  const dispatch =useDispatch<AppDispatch>();
 
   useEffect(() => {
     const checkCartTotalAmount = () => {
@@ -29,53 +25,18 @@ const Checkout = () => {
         setCartTotal(Number(cartAmount));
       }
     };
-
-    // Initial load of the tip from sessionStorage
     checkCartTotalAmount();
-
-
   }, [cartTotal]);
 
-
   useEffect(() => {
-    // Convert the amount to cents when the component mounts or when 'amount' changes
     const fetchAmountInCents = async () => {
       const convertedAmount = await convertToSubcurrency(cartTotal);
       setAmountInCents(convertedAmount);  // Set the converted value to state
-      setLoading(true)
+      setLoading(true);
     };
 
     fetchAmountInCents();
-  }, [cartTotal]);  // This effect will run whenever 'amount' changes
-
-  useEffect(() => {
-    if (cart.length > 0 && foodItems.length > 0) {
-      const cartOrder = createOrder(cart, foodItems);
-      setOrder(cartOrder);
-    }
-  }, [cart, foodItems]); // Only depend on cart and foodItems
-
-  const createOrder = (cart: Cart[], foodItems: FoodItem[]) => {
-    return cart.reduce((accumulator: OrderItem[], cartItem) => {
-      // Find the food item from foodItems array that matches the cart's itemId
-      const foodItem = foodItems.find(item => item.id === cartItem.itemId);
-      // If food item is found, add it to the accumulator
-      if (foodItem) {
-        accumulator.push({
-          id: cartItem.itemId,
-          name: foodItem.itemName,
-          quantity: cartItem.quantity,
-          unit_amount: {
-            currency_code: 'USD',
-            value: String((foodItem.price).toFixed(2))
-          }// price based on quantity
-        });
-      }
-
-      // Return the accumulator at the end of each iteration
-      return accumulator;
-    }, []); // Initialize the accumulator as an empty array
-  };
+  }, [cartTotal]);
 
   if (!loading && amountInCents <= 0) {
     return (
@@ -84,7 +45,7 @@ const Checkout = () => {
           className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
           role="status"
         >
-          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+          <span className="!absolute !-m-px !-h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
             Loading...
           </span>
         </div>
@@ -92,7 +53,32 @@ const Checkout = () => {
     );
   }
 
+  const handlePaymentMethodChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPaymentMethod(event.target.value as 'paypal' | 'stripe');
+  };
 
+  const createOrder = async () => {
+    try {
+      const response = await fetch('/api/create-order-success', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderDetails: cart,
+          orderType: OrderType.ONLINE,
+          paymentMethod: 'PayPal'
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        dispatch({ type: "cart/updateCartOrderCreatedSaga" });
+      } else {
+        throw new Error(data.message || 'Failed to create order');
+      }
+    } catch (error) {
+      console.error('Error creating PayPal order:', error);
+    }
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
@@ -101,38 +87,39 @@ const Checkout = () => {
           Checkout
         </Typography>
 
-        {/* Dynamic Button Layout: Stack on Mobile, Row on Desktop */}
-        {/* <Stack direction={isMobileView ? 'column' : 'row'} spacing={2} className="my-4">
-          <Button
-            fullWidth={isMobileView}
-            startIcon={<FontAwesomeIcon icon={faPaypal} />}
-            variant={paymentMethod === 'paypal' ? 'contained' : 'outlined'}
-            color="primary"
-            // startIcon={<PayPalIcon />}
-            onClick={() => setPaymentMethod('paypal')}
+        {/* Payment Method Selection */}
+        <FormControl component="fieldset">
+          <RadioGroup
+            aria-label="payment-method"
+            value={paymentMethod}
+            onChange={handlePaymentMethodChange}
+            row
           >
-            Pay with PayPal
-          </Button>
+            <FormControlLabel
+              value="paypal"
+              control={<Radio />}
+              label="Pay with PayPal"
+            />
+            <FormControlLabel
+              value="stripe"
+              control={<Radio />}
+              label="Pay with Stripe"
+            />
+          </RadioGroup>
+        </FormControl>
 
-          <Button
-            fullWidth={isMobileView}
-            variant={paymentMethod === 'stripe' ? 'contained' : 'outlined'}
-            color="secondary"
-            startIcon={<FontAwesomeIcon icon={faStripe} />}
-            onClick={() => setPaymentMethod('stripe')}
-          >
-            Pay with Stripe
-          </Button>
-        </Stack> */}
-
-        {/* Animated Payment Component */}
+        {/* Show PayPal or Stripe based on selection */}
+        {
+          paymentMethod === 'paypal' && amountInCents > 0 && cart.length > 0 && (
+            <PaypalComponent amount={amountInCents} createOrder={createOrder} />
+          )
+        }
 
         {
-            amountInCents > 0 && order.length > 0  && (
-              <PaypalComponent amount={amountInCents} order={order} />
-            )
-          }
-        {/* <StripeComponent amount={amountInCents} /> */}
+          paymentMethod === 'stripe' && amountInCents > 0 && cart.length > 0 && (
+            <StripeComponent amount={amountInCents} createOrder={createOrder} />
+          )
+        }
       </Card>
     </div>
   );

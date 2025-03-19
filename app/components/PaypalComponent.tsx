@@ -2,24 +2,20 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
-import { OrderItem } from '../utils/types/order_type';
-
 interface PaypalComponentProps {
-    order: OrderItem[];
+    createOrder: () => void
     amount: number
 }
 
-const PaypalComponent: React.FC<PaypalComponentProps> = ({ amount, order }) => {
+const PaypalComponent: React.FC<PaypalComponentProps> = ({ amount, createOrder }) => {
     const [orderId, setOrderId] = useState<string | null>(null);
     const isOrderCreatedRef = useRef(false);
     const amountRef = useRef(amount);
-    const orderRef = useRef(order);
 
     useEffect(() => {
         // Track the latest values of amount and order
         amountRef.current = amount;
-        orderRef.current = order;
-    }, [amount, order]); // Ensure that refs are updated with latest values
+    }, [amount]); // Ensure that refs are updated with latest values
     useEffect(() => {
         // Create order on the server when the component mounts and when amount/order change
         const createOrder = async () => {
@@ -27,7 +23,7 @@ const PaypalComponent: React.FC<PaypalComponentProps> = ({ amount, order }) => {
                 const response = await fetch('/api/create-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount: amountRef.current, order: orderRef.current }),
+                    body: JSON.stringify({ amount: amountRef.current }),
                 });
                 const data = await response.json();
 
@@ -79,6 +75,7 @@ const PaypalComponent: React.FC<PaypalComponentProps> = ({ amount, order }) => {
                     onApprove={async (data, actions) => {
                         if (actions.order) {
                             const order = await actions.order.capture();
+                            await createOrder()
                             console.log('Payment Successful!', order);
                             window.location.href = '/payment-success';
                         } else {
@@ -91,7 +88,6 @@ const PaypalComponent: React.FC<PaypalComponentProps> = ({ amount, order }) => {
                         console.error('PayPal error:', err);
                         window.location.href = '/payment-cancel';
                     }}
-
                 />
 
             </div>

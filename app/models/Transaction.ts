@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';  // uuid for generating unique transactionId
-import { Counter } from './Counter';
+import Counter from './Counter';
 
 export const TransactionSchemaName = "Transaction"; // Collection name
 
@@ -57,18 +57,26 @@ const TransactionSchema = new Schema<ITransaction>({
 // Pre-save hook for generating transactionId and displayId
 TransactionSchema.pre('save', async function (next) {
   if (this.isNew) {
+    try {
+      // Get the counter for 'order' type and increment the sequence
+      const counter = await Counter.findOneAndUpdate(
+        { _id: 'payment' },  // Find by the 'order' type
+        { $inc: { seq: 1 } },  // Increment the sequence
+        { new: true, upsert: true }  // Create if not found
+      );
 
-    const counter = await Counter.findByIdAndUpdate(
-      { _id: 'orderId' },
-      { $inc: { seq: 1 } },
-      { new: true, upsert: true }
-    );
-    this.displayId = `T${String(counter.seq).padStart(8, '0')}`;
+      // Generate the displayId (e.g., "O00000001")
+      this.displayId = `T${String(counter.seq).padStart(8, '0')}`;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err:any) {
+      console.error('Error generating displayId:', err);
+      next(err);
+    }
   }
   next();
 });
 
-const Transaction = mongoose.model('Transaction', TransactionSchema)
+const Transaction =mongoose?.models?.Transaction || mongoose.model('Transaction', TransactionSchema)
 
 export default Transaction;
 
