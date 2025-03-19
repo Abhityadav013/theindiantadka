@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const onlineOrder = orderType === OrderType.ONLINE;
     const pickupOrder = orderType === OrderType.PICKUP;
     const status: OrderStatus = OrderStatus.INPROGRESS;
-    const orderDate = new Date();
+    const orderDate = new Date().toISOString().split("T")[0];
     // Ensure onlineOrder is true and validate provided data
 
     if (!orderDetails || orderDetails.length === 0 || !orderDate) {
