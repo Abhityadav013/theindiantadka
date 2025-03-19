@@ -45,7 +45,7 @@ const storeTransaction = async (
 
     await connectToDatabase();  // Ensure DB connection
     const transaction = new Transaction({ // Generate a unique transaction ID
-      paymentProvider: 'Stripe',
+      paymentProvider: 'stripe',
       paymentIntentId: paymentIntent.id,
       amount: paymentIntent.amount_received / 100,  // Convert from cents
       currency: paymentIntent.currency,
