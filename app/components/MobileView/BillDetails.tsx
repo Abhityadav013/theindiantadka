@@ -10,8 +10,9 @@ import { getDistanceFromLatLon, Location } from '@/app/libs/common/distanceUserL
 
 const BillDetails = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const [deliveryTip, setDeliveryTip] = useState<string | null>(null);
+    const [deliveryTip, setDeliveryTip] = useState<number | null>(null);
     const [deliveryFee, setDeliveryFee] = useState<string | null>(null);
+    const [isFreeDelivery, setFreeDelivery] = useState<boolean>(false);
     const { cartTotal } = useSelector((state: RootState) => state.cart);
     const { userAddress } = useSelector((state: RootState) => state.address);
 
@@ -39,8 +40,10 @@ const BillDetails = () => {
 
                 // Get distance and handle it (store, log, or use it)
                 const distance = getDistanceFromLatLon(restroLocation, parsedUserLocation);
-                if (typeof distance !== 'boolean') {
+                if (typeof distance !== 'boolean' && typeof distance !== 'string') {
                     setDeliveryFee(distance)
+                } else if (typeof distance === 'string') {
+                    setFreeDelivery(true)
                 }
             } catch (error) {
                 console.error("Error parsing user location:", error);
@@ -51,8 +54,8 @@ const BillDetails = () => {
     useEffect(() => {
         const checkSessionStorage = () => {
             const tip = sessionStorage.getItem('tipAmount');
-            if (tip && tip !== deliveryTip) {
-                setDeliveryTip(tip); // Update the state with the new tip value
+            if (tip && tip !== String(deliveryTip)) {
+                setDeliveryTip(parseFloat(tip)); // Update the state with the new tip value
             }
             else if (!tip) {
                 setDeliveryTip(null);
@@ -84,7 +87,7 @@ const BillDetails = () => {
                 <Typography variant="body2" className="flex justify-between">Item Total <span>€{cartTotal}</span></Typography>
                 <Typography variant="body2" className="flex justify-between">Delivery Fee<span className={!deliveryFee ? `text-emerald-600 text-xs cursor-pointer` : ''} onClick={handleDeliveryAddress}>{userAddress?.length === 0 ? 'Add Delivery Address' : deliveryFee}</span></Typography>
                 <Typography variant="caption" className="text-gray-500">This fee fairly goes to our delivery partners for delivering your food</Typography>
-                <Typography variant="body2" className={`flex justify-between ${deliveryTip ? '' : 'text-orange-500 cursor-pointer'} `}>Delivery Tip {deliveryTip ? <span>€{deliveryTip}</span> : <span onClick={addTipToDelivery}>Add tip</span>}</Typography>
+                <Typography variant="body2" className={`flex justify-between ${deliveryTip ? '' : 'text-orange-500 cursor-pointer'} `}>Delivery Tip {deliveryTip ? <span>€{deliveryTip}</span> : (isFreeDelivery ? <span>Free</span> : <span onClick={addTipToDelivery}>Add tip</span>)}</Typography>
                 {/* <Typography variant="body2" className="flex justify-between">GST and Restaurant Charges <span>€{gstAndRestaurantCharges}</span></Typography> */}
                 <Divider className="my-2" />
                 <Typography variant="body1" className="flex justify-between font-semibold">
