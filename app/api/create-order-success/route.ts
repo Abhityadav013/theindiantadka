@@ -6,7 +6,7 @@ import Menu from '@/app/models/Menu';
 export async function POST(request: NextRequest) {
   await connectToDatabase(); // Ensure DB connection
   try {
-    const { orderDetails, orderType, paymentMethod } = await request.json();
+    const { orderDetails, orderType } = await request.json();
     const onlineOrder = orderType === OrderType.ONLINE;
     const pickupOrder = orderType === OrderType.PICKUP;
     const status: OrderStatus = OrderStatus.INPROGRESS;
@@ -64,7 +64,6 @@ export async function POST(request: NextRequest) {
         onlineOrder,
         pickupOrder,
         status,
-        paymentMethod,
         orderAmount,
       });
       await newOrder.save();

@@ -7,10 +7,9 @@ import {  CircularProgress, Box } from '@mui/material';
 
 interface StripeCheckoutProps{
     amount:number,
-    createOrder:()=>void
 }
 
-const CheckoutPage:React.FC<StripeCheckoutProps> = ({amount,createOrder}) => {
+const CheckoutPage:React.FC<StripeCheckoutProps> = ({amount}) => {
     const stripe = useStripe();
     const elements = useElements();
     const [errorMessage, setErrorMessage] = useState<string>();
@@ -55,8 +54,6 @@ const CheckoutPage:React.FC<StripeCheckoutProps> = ({amount,createOrder}) => {
         if (response.error) {
             setErrorMessage(response.error.message);
         } else {
-            console.log('Stripe DOne')
-            createOrder()
             // Payment successful logic here (e.g., redirect to success page)
         }
         setLoading(false);

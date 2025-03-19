@@ -3,11 +3,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 interface PaypalComponentProps {
-    createOrder: () => void
     amount: number
 }
 
-const PaypalComponent: React.FC<PaypalComponentProps> = ({ amount, createOrder }) => {
+const PaypalComponent: React.FC<PaypalComponentProps> = ({ amount }) => {
     const [orderId, setOrderId] = useState<string | null>(null);
     const isOrderCreatedRef = useRef(false);
     const amountRef = useRef(amount);
@@ -75,7 +74,6 @@ const PaypalComponent: React.FC<PaypalComponentProps> = ({ amount, createOrder }
                     onApprove={async (data, actions) => {
                         if (actions.order) {
                             const order = await actions.order.capture();
-                            await createOrder()
                             console.log('Payment Successful!', order);
                             window.location.href = '/payment-success';
                         } else {

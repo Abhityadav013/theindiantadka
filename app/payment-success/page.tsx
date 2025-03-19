@@ -2,19 +2,56 @@
 import React, { useEffect } from 'react';
 import { Button, Card, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
+import { OrderType } from '../models/Order';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
+import { Cart } from '../utils/types/cart_type';
 
 const PaymentSuccess = () => {
   const router = useRouter();
-
+  const dispatch = useDispatch<AppDispatch>();
+  const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
   useEffect(() => {
-    // Redirect to the home page after 5 seconds
-    const timer = setTimeout(() => {
-      router.push('/');
-    }, 5000);
+    // Assuming you have some payment status to check if payment is successful.
+    const paymentSuccessful = true; // Replace with actual check logic
 
-    // Clean up the timer when the component unmounts
-    return () => clearTimeout(timer);
-  }, [router]);
+    if (paymentSuccessful) {
+      const createOrder = async () => {
+        try {
+          const response = await fetch('/api/create-order-success', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              orderDetails: cart,
+              orderType: OrderType.ONLINE, // Assuming this is the correct value for your order type
+            }),
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            // Order creation successful
+            dispatch({ type: "cart/updateCartOrderCreatedSaga" });
+          } else {
+            throw new Error(data.message || 'Failed to create order');
+          }
+        } catch (error) {
+          console.error('Error creating order:', error);
+        }
+      };
+
+      createOrder();
+
+      // Redirect to the home page after 5 seconds
+      const timer = setTimeout(() => {
+        router.push('/');
+      }, 5000);
+
+      // Clean up the timer when the component unmounts
+      return () => clearTimeout(timer);
+    } else {
+      console.error('Payment was not successful');
+    }
+  }, [cart, dispatch, router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

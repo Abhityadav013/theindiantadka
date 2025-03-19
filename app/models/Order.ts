@@ -24,7 +24,6 @@ interface IOrder extends Document {
   pickupOrder: boolean;  // Flag to identify pickup orders
   onlineOrder: boolean;  // Flag to identify online orders
   status: OrderStatus;  // Status of the order
-  paymentMethod?: string;  // Optional payment method (cash, card, etc.)
   orderItems: Array<{
     itemId: string;
     itemName: string;
@@ -61,10 +60,6 @@ const OrderSchema = new Schema<IOrder>({
   status: {
     type: String,
     required: true,
-  },
-  paymentMethod: {
-    type: String,
-    required: false,
   },
   orderItems: [
     {
