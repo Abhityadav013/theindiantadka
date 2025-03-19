@@ -70,6 +70,8 @@ const Checkout = () => {
       });
 
       const data = await response.json();
+      console.log('response>>>>>>>',response)
+      console.log('data>>>>>>>',data)
       if (response.ok) {
         dispatch({ type: "cart/updateCartOrderCreatedSaga" });
       } else {

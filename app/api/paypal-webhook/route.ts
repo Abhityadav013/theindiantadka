@@ -192,9 +192,10 @@ const handleOrderApproved = async (orderData: any) => {
     // When an order is approved, you need to capture the payment
     const orderId = orderData.id; // Order ID from the event
     const captureResponse = await capturePayment(orderId);
-
+    if(captureResponse && Object.keys(captureResponse).length > 0){
+      await storeTransaction(captureResponse);
+    }
     // You can now store the captured payment transaction in the database
-    await storeTransaction(captureResponse);
   } catch (error) {
     console.error('Error capturing payment:', error);
   }
