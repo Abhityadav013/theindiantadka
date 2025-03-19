@@ -12,7 +12,7 @@ interface IMenu extends Document {
   category: string;  // Category of the menu item (e.g., appetizer, main course, etc.)
 }
 
-const menuSchema = new Schema<IMenu>({
+const MenuSchema = new Schema<IMenu>({
   id: {
     type: String,  // UUID for id
     required: true,
@@ -42,7 +42,7 @@ const menuSchema = new Schema<IMenu>({
 });
 
 // Remove _id from the response when querying (optional)
-menuSchema.set('toJSON', {
+MenuSchema.set('toJSON', {
   transform: (doc, ret) => {
     // Optionally remove _id from the response
     delete ret._id;
@@ -51,6 +51,6 @@ menuSchema.set('toJSON', {
 });
 
 // Create and export the Menu model
-const Menu = mongoose.model('Menu', menuSchema);
+const Menu =   mongoose?.models?.Menu || mongoose.model('Menu', MenuSchema);
 
 export default Menu;
