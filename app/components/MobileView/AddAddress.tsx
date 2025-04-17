@@ -3,7 +3,6 @@ import { Box, Typography } from "@mui/material";
 import AddAddressButton from "./AddAddressButton";
 // import CartNavigate from "./CartNavigate";
 import AddLocationAltOutlinedIcon from '@mui/icons-material/AddLocationAltOutlined';
-import AddressForm from "./AddressForm";
 
 interface AddAddressSectionProps{
     isMobile:boolean
@@ -30,8 +29,7 @@ const AddAddressSection: React.FC<AddAddressSectionProps> = ({isMobile}) => {
                 </Typography>
             </Box>
 
-            <AddAddressButton />
-            <AddressForm />
+            <AddAddressButton textToDisplay="Add Address To Proceed" />
             {/* <CartNavigate /> */}
         </Box>
     );

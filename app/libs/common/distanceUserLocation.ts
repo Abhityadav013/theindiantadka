@@ -27,8 +27,9 @@ export interface Location {
     }
   
     distance = parseFloat(distance.toFixed(2)); // Round to 2 decimal places  
+    console.log("Distance:", distance, "km");
     // If distance is greater than 10 km, return false
-    if (distance > 10) return false;
+    if (distance >= 10) return false;
   
     // If distance is within 3 km, delivery is free
     if (distance < 3) return "Free";
@@ -36,6 +37,6 @@ export interface Location {
     const extraKm = distance - 3;
     const deliveryFee = 1 + extraKm * 0.5;
   
-    return deliveryFee.toFixed(2); // Return fee as a string with 2 decimal places
+    return parseFloat(deliveryFee.toFixed(2)); // Return fee as a string with 2 decimal places
   }
   

@@ -6,6 +6,7 @@ import userLocationReducer from "./userLocationReducer";
 import addressReducer from "./addressReducer";
 import userReducer from "./userProfileReducer";
 import mobileReducer from "../slices/mobileSlice";
+import customerReducer from './customerDetailsReducer';
 
 const rootReducer = combineReducers({
   menu: menuReducer,
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
   address: addressReducer,
   user: userReducer,
   mobile: mobileReducer,
+  customerDetails:customerReducer
 });
 
 export default rootReducer;

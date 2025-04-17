@@ -24,7 +24,7 @@ const AddressDetector: React.FC = () => {
     }
   }, [dispatch, cartTotal])
   useEffect(() => {
-    dispatch({ type: "address/fetchUserAddressSaga" });
+    dispatch({ type: "customerDetails/fetchCustomerDetailsSaga" });
   }, [dispatch]);
 
   return <></>;

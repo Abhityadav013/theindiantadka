@@ -1,20 +1,78 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Card, Typography, Radio, RadioGroup, FormControlLabel, FormControl } from '@mui/material';
+import { Card, Typography, Radio, RadioGroup, FormControlLabel, FormControl, IconButton, Box, Divider } from '@mui/material';
+import Image from 'next/image';
 import { RootState } from '../redux/store';
 import { convertToSubcurrency } from '../utils/convertToSubCurrency';
 import StripeComponent from '../components/StripeComponent';
 import PaypalComponent from '../components/PaypalComponent';
-import { Cart } from '../utils/types/cart_type';
+import { motion } from 'framer-motion';
+import PaymentCheckoutCart from '../components/PaymentCheckoutCart';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useRouter } from 'next/navigation';
+import { FoodItem } from '../utils/types/menu_type';
+import PaymentCheckoutBill from '../components/PaymentCheckoutBill';
+import { OrderType } from '../models/Order';
+import PaymentIcon from '@mui/icons-material/Payment';
 
 const Checkout = () => {
   const [amountInCents, setAmountInCents] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'stripe' | null>(null);
-  const isMobileView = useSelector((state: RootState) => state.mobile.isMobile); // Responsive state
   const [cartTotal, setCartTotal] = useState<number>(0);
-  const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
+  const [deliveryTip, setDeliveryTip] = useState<number | null>(null);
+  const [deliveryFee, setDeliveryFee] = useState<string | null>(null);
+  const [isFreeDelivery, setFreeDelivery] = useState<boolean>(false);
+  const { cart } = useSelector((state: RootState) => state.cart);
+  const foodItems: FoodItem[] = useSelector((state: RootState) => state.menu.foodMenuItems);
+  const isMobileView = useSelector((state: RootState) => state.mobile.isMobile); // Responsive state
+  const { customerOrder, customerDetails, isCustomerDetailsPresent } = useSelector(
+    (state: RootState) => state.customerDetails,
+  );
+
+  useEffect(() => {
+    const checkSessionStorage = () => {
+      const tip = sessionStorage.getItem('tipAmount');
+      if (tip && tip !== String(deliveryTip)) {
+        setDeliveryTip(parseFloat(tip)); // Update the state with the new tip value
+      }
+      else if (!tip) {
+        setDeliveryTip(null);
+      }
+    };
+
+    // Initial load of the tip from sessionStorage
+    checkSessionStorage();
+
+    // Set up interval to check sessionStorage every 500ms
+    const intervalId = setInterval(checkSessionStorage, 5);
+
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, [deliveryTip]);
+
+
+  const filteredFoodItems = foodItems.filter((food) =>
+    cart.some(cartItem => cartItem.itemId === food.id && cartItem.quantity > 0)
+  );
+
+  const router = useRouter();
+
+  const onBack = () => {
+    router.back();
+  };
+
+  useEffect(() => {
+    if (isCustomerDetailsPresent) {
+      if (customerDetails?.deliveryFee) {
+        setDeliveryFee(customerDetails.deliveryFee)
+      }
+      if (customerDetails?.isFreeDelivery) {
+        setFreeDelivery(customerDetails.isFreeDelivery)
+      }
+    }
+  }, [isCustomerDetailsPresent, customerDetails])
 
   useEffect(() => {
     const checkCartTotalAmount = () => {
@@ -35,18 +93,12 @@ const Checkout = () => {
 
     fetchAmountInCents();
   }, [cartTotal]);
-
-  if (!loading && amountInCents <= 0) {
+  if (!loading && amountInCents <= 0 || (cart.length === 0 && filteredFoodItems.length === 0)) {
     return (
-      <div className="flex items-center justify-center">
-        <div
-          className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-          role="status"
-        >
-          <span className="!absolute !-m-px !-h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-            Loading...
-          </span>
-        </div>
+      <div className="flex items-center justify-center h-screen space-x-2">
+        <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+        <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+        <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
       </div>
     );
   }
@@ -55,48 +107,100 @@ const Checkout = () => {
     setPaymentMethod(event.target.value as 'paypal' | 'stripe');
   };
 
+  const isDeliveryOrder =
+    (customerOrder && customerOrder.orderType === OrderType.DELIVERY) || false;
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <Card className={`p-6 shadow-lg rounded-2xl bg-white ${isMobileView ? 'w-full max-w-sm' : 'w-full max-w-md'}`}>
-        <Typography variant="h5" align="center" gutterBottom>
-          Checkout
-        </Typography>
+    <div className="flex items-center h-screen justify-center min-h-screen w-full">
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card className={`bg-white h-screen ${isMobileView ? 'w-screen p-4' : 'w-[1350px]'}`}>
+          {/* Title */}
+          <div className="flex items-center justify-between mb-4">
+            {/* Back Icon on the left */}
+            <IconButton onClick={onBack} aria-label="back">
+              <ArrowBackIcon />
+            </IconButton>
 
-        {/* Payment Method Selection */}
-        <FormControl component="fieldset">
-          <RadioGroup
-            aria-label="payment-method"
-            value={paymentMethod}
-            onChange={handlePaymentMethodChange}
-            row
-          >
-            <FormControlLabel
-              value="paypal"
-              control={<Radio />}
-              label="Pay with PayPal"
-            />
-            <FormControlLabel
-              value="stripe"
-              control={<Radio />}
-              label="Pay with Stripe"
-            />
-          </RadioGroup>
-        </FormControl>
+            {/* Centered Title */}
+            <Typography variant="h5" className="font-semibold flex-1 text-center">
+              Checkout
+            </Typography>
 
-        {/* Show PayPal or Stripe based on selection */}
-        {
-          paymentMethod === 'paypal' && amountInCents > 0 && cart.length > 0 && (
-            <PaypalComponent amount={amountInCents} />
-          )
-        }
+            {/* Placeholder to keep spacing balanced */}
+            <div className="w-10" /> {/* Same width as IconButton to balance layout */}
+          </div>
 
-        {
-          paymentMethod === 'stripe' && amountInCents > 0 && cart.length > 0 && (
-            <StripeComponent amount={amountInCents} />
-          )
-        }
-      </Card>
+          {/* Order Summary */}
+          <PaymentCheckoutCart foodItem={filteredFoodItems} cart={cart} />
+          <Divider className="my-2" />
+          <PaymentCheckoutBill
+            isDeliveryOrder={isDeliveryOrder}
+            cartTotal={cartTotal}
+            deliveryFee={deliveryFee ?? ''}
+            deliveryTip={deliveryTip !== null ? deliveryTip.toString() : ''}
+            isFreeDelivery={isFreeDelivery}
+          />
+          <Divider className="my-2" />
+          {/* Payment Method Selection */}
+          <Box>
+            <Typography variant="h6" className="font-semibold">
+              <IconButton>
+                <PaymentIcon fontSize="medium" className="text-gray-700" />
+              </IconButton>
+              Pay via
+            </Typography>
+            <Box sx={{marginLeft:'20px',marginTop:'5px'}}>
+            <FormControl component="fieldset" fullWidth>
+              <RadioGroup
+                aria-label="payment-method"
+                value={paymentMethod}
+                onChange={handlePaymentMethodChange}
+                className="space-y-4"
+              >
+                <FormControlLabel
+                  value="paypal"
+                  control={<Radio />}
+                  label={
+                    <span className="flex items-center gap-2">
+                      <Image src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" width={24} height={24} />
+                      Pay with PayPal
+                    </span>
+                  }
+                />
+                <FormControlLabel
+                  value="stripe"
+                  control={<Radio />}
+                  label={
+                    <span className="flex items-center gap-2">
+                      <Image src="https://stripe.com/img/v3/home/twitter.png" alt="Stripe" width={24} height={24} />
+                      Pay with Stripe
+                    </span>
+                  }
+                />
+              </RadioGroup>
+            </FormControl>
+            </Box>
+        
+          </Box>
+
+
+          {/* Payment Components */}
+          <div className="mt-6">
+            {paymentMethod === 'paypal' && amountInCents > 0 && cart.length > 0 && (
+              <PaypalComponent amount={amountInCents} />
+            )}
+            {paymentMethod === 'stripe' && amountInCents > 0 && cart.length > 0 && (
+              <StripeComponent amount={amountInCents} />
+            )}
+          </div>
+        </Card>
+      </motion.div>
     </div>
+
   );
 };
 

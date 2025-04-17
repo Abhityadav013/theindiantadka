@@ -13,9 +13,9 @@ export interface Address {
 
 export interface UserAddress {
   displayAddress: string;
-  flatNumber: string;
   buildingNumber: string;
   street: string;
+  town: string;
   pincode: string;
   addressType: string;
 }

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import { Cart } from '../utils/types/cart_type';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/reducers';
 import FakeSection from '../components/MobileView/FakeCheckout';
 import CartSection from '../components/MobileView/CartSection';
@@ -11,7 +11,6 @@ import { Box } from '@mui/material';
 import Loader from '../components/Loader';
 import AddAddressSection from '../components/MobileView/AddAddress';
 import RestroSuggestion from '../components/RestroSuggestion';
-import AddressSection from '../components/MobileView/AddressSection';
 import BillDetails from '../components/MobileView/BillDetails';
 import PaymentCheckout from '../components/MobileView/PaymentCheckout';
 import ReviewOrderSection from '../components/MobileView/ReviewOrderSection';
@@ -19,20 +18,37 @@ import TipOptions from '../components/MobileView/TipOptions';
 import CartHistory from '../components/CartHistory';
 import Image from 'next/image';
 import EmptyCart from '../components/EmptyCart';
+import { OrderType } from '../models/Order';
+import { UserAddress } from '../utils/types/address_type';
+import CustomerContactDetails from '../components/MobileView/CustomerContatcDetail';
+import { AppDispatch } from '../redux/store';
+import { openCustomerDetailsModel } from '../redux/reducers/customerDetailsReducer';
+import { useRouter } from 'next/navigation';
 
 const images = [
-  "https://testing.indiantadka.eu/assets/DiscountImage1.jpg",
-  "https://testing.indiantadka.eu/assets/DiscountImage2.jpg",
-  "https://testing.indiantadka.eu/assets/DiscountImage3.jpg",
+  'https://testing.indiantadka.eu/assets/DiscountImage1.jpg',
+  'https://testing.indiantadka.eu/assets/DiscountImage2.jpg',
+  'https://testing.indiantadka.eu/assets/DiscountImage3.jpg',
 ];
 
 const Checkout = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [deliveryFee, setDeliveryFee] = useState<string | null>(null);
+  const [isFreeDelivery, setFreeDelivery] = useState<boolean>(false);
   const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
-  const { userAddress } = useSelector((state: RootState) => state.address);
+  const { customerDetails, customerOrder, isCustomerDetailsPresent } = useSelector(
+    (state: RootState) => state.customerDetails,
+  );
   const { isMobile } = useSelector((state: RootState) => state.mobile);
   const billDetailsRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter()
+
+  const dispatch = useDispatch<AppDispatch>();
+
+  const handleUserDetailModal = () => {
+    dispatch(openCustomerDetailsModel())
+  }
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -43,9 +59,11 @@ const Checkout = () => {
   }, []);
 
   const scrollToBillDetails = () => {
-    billDetailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    billDetailsRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
   };
-
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -55,35 +73,80 @@ const Checkout = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (isCustomerDetailsPresent) {
+      if (customerDetails?.deliveryFee) {
+        setDeliveryFee(customerDetails.deliveryFee)
+      }
+      if (customerDetails?.isFreeDelivery) {
+        setFreeDelivery(customerDetails.isFreeDelivery)
+      }
+      if (customerDetails?.notDeliverable) {
+        router.push('/delivery-error')
+      }
+    }
+  }, [isCustomerDetailsPresent, customerDetails, router])
+
+
+  const isDeliveryOrder =
+    (customerOrder && customerOrder.orderType === OrderType.DELIVERY) || false;
+
+  const showDeliverySections =
+    !isCustomerDetailsPresent || // Show when no customer details yet
+    (isCustomerDetailsPresent && isDeliveryOrder); // Or it's a delivery order
+
+
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Loader loadingImage={'https://testing.indiantadka.eu/assets/cart-item-loader.gif'} isLoading={isLoading} />
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
+      >
+        <Loader
+          loadingImage={
+            'https://testing.indiantadka.eu/assets/cart-item-loader.gif'
+          }
+          isLoading={isLoading}
+        />
       </Box>
     );
   }
 
   if (cart.length === 0) {
-    return isMobile ? <FakeSection /> : <div className="flex justify-center mt-10">
-      <EmptyCart />
-    </div>;
+    return isMobile ? (
+      <FakeSection />
+    ) : (
+      <div className="flex justify-center mt-10">
+        <EmptyCart />
+      </div>
+    );
   } else {
     return (
-      <Box> {/* Add padding to the bottom */}
+      <Box>
+        {' '}
+        {/* Add padding to the bottom */}
         <CartSection />
         {/* Cart Item Section with fixed height and scroll */}
-        <Box className={!isMobile ? `max-w-8xl mx-auto flex gap-4 space-around bg-white` : ''}>
-          {
-            isMobile ?
-              (<Box className="mt-20">
-                <CartItem />
-              </Box>) :
-              (
-                <div className="mt-20  ml-10 mr-14">
-                  <CartHistory />
-                </div>
-              )
+        <Box
+          className={
+            !isMobile
+              ? `max-w-8xl mx-auto flex gap-4 space-around bg-white`
+              : ''
           }
+        >
+          {isMobile ? (
+            <Box className="mt-20">
+              <CartItem />
+            </Box>
+          ) : (
+            <Box className="mt-20" sx={{ width: '40%' }}>
+              <CartHistory />
+            </Box>
+          )}
           <Box
             sx={{
               ...(!isMobile && {
@@ -98,86 +161,107 @@ const Checkout = () => {
               <Box>
                 <RestroSuggestion />
               </Box>
-              <Box> {/* Add margin to ensure CartItem is below CartSection */}
-                <TipOptions />
+
+
+              <Box ref={billDetailsRef}>
+                {' '}
+                {/* Add margin to ensure CartItem is below CartSection */}
+                <BillDetails isDeliveryOrder={isDeliveryOrder} isFreeDelivery={isFreeDelivery} deliveryFee={deliveryFee ?? null} />
               </Box>
-              <Box ref={billDetailsRef}> {/* Add margin to ensure CartItem is below CartSection */}
-                <BillDetails />
-              </Box>
+
+              {showDeliverySections && (
+                <Box>
+                  <ReviewOrderSection />
+                </Box>
+              )}
+              {
+                !isLoading && isCustomerDetailsPresent && (
+                  <Box>
+                    <CustomerContactDetails isDeliveryOrder={isDeliveryOrder} onEdit={handleUserDetailModal} customerName={customerDetails?.name ?? ''} customerPhone={customerDetails?.phoneNumber ?? ''} customerAddress={customerDetails?.address ?? {} as UserAddress} />
+                  </Box>
+                )
+              }
+              {showDeliverySections && (
+                <Box>
+                  <TipOptions />
+                </Box>
+              )}
+
               <Box>
-                <ReviewOrderSection />
-              </Box>
-              <Box>
-                {
-                  userAddress?.length === 0 ?
-                    <AddAddressSection isMobile={isMobile} />
-                    :
-                    <>
-                      <AddressSection userAddress={userAddress} />
-                      <PaymentCheckout scrollToBillDetails={scrollToBillDetails} />
-                    </>}
+                {customerDetails &&
+                  Object.keys(customerDetails).length === 0 ? (
+                  <AddAddressSection isMobile={isMobile} />
+                ) : (
+                  <>
+                    {/* {showDeliverySections && customerDetails?.address &&
+                      Object.keys(customerDetails.address).length === 0 && (
+                        <AddressSection
+                          userAddress={
+                            customerDetails.address || ({} as UserAddress)
+                          }
+                        />
+                      )} */}
+                    <PaymentCheckout
+                      scrollToBillDetails={scrollToBillDetails}
+                    />
+                  </>
+                )}
               </Box>
             </Box>
-
-
-
           </Box>
-          {
-            !isMobile && (
+          {!isMobile && (
+            <Box
+              sx={{
+                flexShrink: 0,
+                marginLeft: 'auto',
+                position: 'relative',
+                width: 350,
+                height: '100vh',
+                overflow: 'hidden',
+                marginTop: '85px', // Adds space from the top
+                display: 'flex',
+                flexDirection: 'column', // Stacks slideshow & image vertically
+                alignItems: 'center', // Centers the delivery image
+              }}
+            >
+              {/* Slideshow */}
               <Box
                 sx={{
-                  flexShrink: 0,
-                  marginLeft: "auto",
-                  position: "relative",
-                  width: 350,
-                  height: '100vh',
-                  overflow: "hidden",
-                  marginTop: "85px", // Adds space from the top
-                  display: "flex",
-                  flexDirection: "column", // Stacks slideshow & image vertically
-                  alignItems: "center", // Centers the delivery image
+                  width: '100%',
+                  height: '100%', // Set a fixed height
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
-                {/* Slideshow */}
-                <Box
-                  sx={{
-                    width: "100%",
-                    height: "100%", // Set a fixed height
-                    position: "relative",
-                    overflow: "hidden",
-                  }}
-                >
-                  {images.map((img, index) => (
-                    <Image
-                      key={index}
-                      src={img}
-                      alt={`Discount ${index + 1}`}
-                      width={350}
-                      height={350}
-                      className="object-cover transition-opacity duration-1000"
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        opacity: index === currentIndex ? 1 : 0, // Show only the active image
-                        transition: "opacity 1s ease-in-out",
-                      }}
-                    />
-                  ))}
-                </Box>
-
-                {/* Delivery Man Image (Placed below slideshow) */}
-                <Image
-                  src="https://testing.indiantadka.eu/assets/deliveryMan.gif"
-                  alt="Delivery Man"
-                  width={300} // Increased size for visibility
-                  height={100}
-                  className="object-cover mt-4 ml-2" // Adds margin-top
-                />
+                {images.map((img, index) => (
+                  <Image
+                    key={index}
+                    src={img}
+                    alt={`Discount ${index + 1}`}
+                    width={350}
+                    height={350}
+                    className="object-cover transition-opacity duration-1000"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      opacity: index === currentIndex ? 1 : 0, // Show only the active image
+                      transition: 'opacity 1s ease-in-out',
+                    }}
+                  />
+                ))}
               </Box>
-            )
-          }
 
+              {/* Delivery Man Image (Placed below slideshow) */}
+              <Image
+                src="https://testing.indiantadka.eu/assets/deliveryMan.gif"
+                alt="Delivery Man"
+                width={300} // Increased size for visibility
+                height={100}
+                className="object-cover mt-4 ml-2" // Adds margin-top
+              />
+            </Box>
+          )}
         </Box>
       </Box>
     );

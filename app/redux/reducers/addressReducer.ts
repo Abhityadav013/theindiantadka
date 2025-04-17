@@ -4,7 +4,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 interface AddressState {
   addressModel: boolean;
   address: Address;
-  userAddress:  UserAddress[];
+  userAddress:  UserAddress | null;
   newAddress:UserAddress | null;
   loading: boolean;
   error: string | null;
@@ -13,7 +13,7 @@ interface AddressState {
 const initialState: AddressState = {
   addressModel: false,
   address: {},
-  userAddress: [],
+  userAddress: null,
   newAddress :null,
   loading: false,
   error: null,
@@ -35,8 +35,8 @@ const addressSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
-    fetchUserAddressSuccess: (state, action: PayloadAction<UserAddress[]>) => {
-      state.userAddress = action.payload;
+    fetchUserAddressSuccess: (state, action: PayloadAction<UserAddress>) => {
+      state.userAddress = (action.payload);
       state.loading = false;
     },
     fetchUserAddressFailure: (state, action: PayloadAction<string>) => {
@@ -50,7 +50,7 @@ const addressSlice = createSlice({
       state.newAddress = action.payload;
       state.loading = false;
     },
-    updateUserAddressSuccess: (state, action: PayloadAction<UserAddress[]>) => {
+    updateUserAddressSuccess: (state, action: PayloadAction<UserAddress>) => {
       state.userAddress = action.payload;
       state.loading = false;
     },
