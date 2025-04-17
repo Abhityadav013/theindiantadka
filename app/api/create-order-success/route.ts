@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   await connectToDatabase(); // Ensure DB connection
   try {
     const { orderDetails, orderType } = await request.json();
-    const onlineOrder = orderType === OrderType.ONLINE;
+    const onlineOrder = orderType === OrderType.DELIVERY;
     const pickupOrder = orderType === OrderType.PICKUP;
     const status: OrderStatus = OrderStatus.INPROGRESS;
     const orderDate = new Date().toISOString().split("T")[0];
