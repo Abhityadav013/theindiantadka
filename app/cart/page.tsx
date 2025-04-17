@@ -1,7 +1,6 @@
 "use client"
 import React, { useEffect } from "react";
 import CartPayments from "../components/CartPayments";
-import DeliveryAddress from "../components/DeliveryAddress";
 import { LocationOn, Payment } from "@mui/icons-material";
 import CartHistory from "../components/CartHistory";
 import { useSelector } from "react-redux";
@@ -47,7 +46,6 @@ const CartItem = () => {
                   <div className="absolute -left-0 top-2">
                     <LocationOn className="bg-black text-white rounded p-1" fontSize="large" />
                   </div>
-                  <DeliveryAddress />
                 </div>
                 <div className="absolute left-4 top-12 bottom-5 w-0.5 border-l-2 border-dotted border-gray-400"></div>
 
