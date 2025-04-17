@@ -34,7 +34,7 @@ const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({ scrollToBillDetails }
   };
 
   return (
-    <Box className="mt-4 p-4 border rounded-lg bg-white shadow-md flex justify-between items-center">
+    <Box className="mt-4 p-4 border rounded-lg bg-white shadow-md flex">
       <Box>
         <Typography variant="h6" className="font-semibold">€{cartTotal}</Typography>
         {/* Call scrollToBillDetails instead of just setting state */}

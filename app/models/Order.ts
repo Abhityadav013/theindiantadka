@@ -6,7 +6,7 @@ export const OrderSchemaName = "Order"; // Collection name
 
 // Define the structure of the Order Schema
 export enum OrderType{
-  ONLINE = 'ONLINE',
+  DELIVERY = 'DELIVERY',
   PICKUP='PICKUP'
 }
 

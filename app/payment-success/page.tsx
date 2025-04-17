@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import { Button, Card, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { OrderType } from '../models/Order';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
 import { Cart } from '../utils/types/cart_type';
@@ -11,6 +10,9 @@ const PaymentSuccess = () => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
+   const { customerOrder } = useSelector(
+      (state: RootState) => state.customerDetails,
+    );
   useEffect(() => {
     // Assuming you have some payment status to check if payment is successful.
     const paymentSuccessful = true; // Replace with actual check logic
@@ -23,7 +25,7 @@ const PaymentSuccess = () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               orderDetails: cart,
-              orderType: OrderType.ONLINE, // Assuming this is the correct value for your order type
+              orderType: customerOrder?.orderType, // Assuming this is the correct value for your order type
             }),
           });
 
@@ -51,7 +53,7 @@ const PaymentSuccess = () => {
     } else {
       console.error('Payment was not successful');
     }
-  }, [cart, dispatch, router]);
+  }, [cart, dispatch,customerOrder, router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

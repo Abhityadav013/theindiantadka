@@ -1,56 +1,30 @@
 'useClient';
 import React, { useEffect, useState } from 'react'
-import { Box, Typography, Divider } from "@mui/material";
+import { Box, Typography, Divider, IconButton } from "@mui/material";
 import { RootState } from '@/app/redux/reducers';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '@/app/redux/store';
 import { openAddressModel } from '@/app/redux/reducers/addressReducer';
-import { getDistanceFromLatLon, Location } from '@/app/libs/common/distanceUserLocation';
+import { OrderType } from '@/app/models/Order';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 
+interface BillDetailsSectionProps {
+    isDeliveryOrder: boolean; // Image URL passed as a prop
+    deliveryFee: string | null;
+    isFreeDelivery: boolean
+}
 
-const BillDetails = () => {
+const BillDetails: React.FC<BillDetailsSectionProps> = ({ isDeliveryOrder, deliveryFee, isFreeDelivery }) => {
     const dispatch = useDispatch<AppDispatch>();
     const [deliveryTip, setDeliveryTip] = useState<number | null>(null);
-    const [deliveryFee, setDeliveryFee] = useState<string | null>(null);
-    const [isFreeDelivery, setFreeDelivery] = useState<boolean>(false);
     const { cartTotal } = useSelector((state: RootState) => state.cart);
-    const { userAddress } = useSelector((state: RootState) => state.address);
+    const { isCustomerDetailsPresent } = useSelector(
+        (state: RootState) => state.customerDetails,
+    );
 
     const handleDeliveryAddress = () => {
         dispatch(openAddressModel())
     }
-    useEffect(() => {
-        const storedLocation = localStorage.getItem('indian_tadka_userLocation');
-        const INDIAN_TADKA_LAT = process.env.NEXT_PUBLIC_INDIAN_TADKA_LAT;
-        const INDIAN_TADKA_LNG = process.env.NEXT_PUBLIC_INDIAN_TADKA_LNG;
-
-        if (storedLocation && userAddress.length > 0) {
-            try {
-                const locationData = JSON.parse(storedLocation);
-
-                const restroLocation: Location = {
-                    lat: Number(INDIAN_TADKA_LAT),
-                    lon: Number(INDIAN_TADKA_LNG)
-                };
-
-                const parsedUserLocation: Location = {
-                    lat: locationData.lat,
-                    lon: locationData.lng
-                };
-
-                // Get distance and handle it (store, log, or use it)
-                const distance = getDistanceFromLatLon(restroLocation, parsedUserLocation);
-                if (typeof distance !== 'boolean' && typeof distance !== 'string') {
-                    setDeliveryFee(distance)
-                } else if (typeof distance === 'string') {
-                    setFreeDelivery(true)
-                }
-            } catch (error) {
-                console.error("Error parsing user location:", error);
-            }
-        }
-    }, [userAddress]);
-
     useEffect(() => {
         const checkSessionStorage = () => {
             const tip = sessionStorage.getItem('tipAmount');
@@ -80,15 +54,24 @@ const BillDetails = () => {
         sessionStorage.setItem('cartTotalAmount', totalAmount);
     }, [cartTotal, deliveryFee, deliveryTip, totalAmount])
 
+
     return (
         <Box className="mt-4 p-4 border rounded-lg bg-white shadow-md">
-            <Typography variant="h6" className="font-semibold">Bill Details</Typography>
+            <Typography variant="h6" className="font-semibold">
+                <IconButton>
+                    <ReceiptIcon fontSize="medium" className="text-gray-700" />
+                </IconButton>
+
+                Bill Details</Typography>
             <Box className="mt-2 text-gray-700 space-y-1">
+                <Typography variant="body2" className="flex justify-between">Order Type<span className='text-orange-600 font-bold'>{isDeliveryOrder ? OrderType.DELIVERY : OrderType.PICKUP}</span></Typography>
                 <Typography variant="body2" className="flex justify-between">Item Total <span>€{cartTotal}</span></Typography>
-                <Typography variant="body2" className="flex justify-between">Delivery Fee<span className={!deliveryFee ? `text-emerald-600 text-xs cursor-pointer` : ''} onClick={handleDeliveryAddress}>{userAddress?.length === 0 ? 'Add Delivery Address' : deliveryFee}</span></Typography>
-                <Typography variant="caption" className="text-gray-500">This fee fairly goes to our delivery partners for delivering your food</Typography>
-                <Typography variant="body2" className={`flex justify-between ${deliveryTip ? '' : 'text-orange-500 cursor-pointer'} `}>Delivery Tip {deliveryTip ? <span>€{deliveryTip}</span> : (isFreeDelivery ? <span>Free</span> : <span onClick={addTipToDelivery}>Add tip</span>)}</Typography>
-                {/* <Typography variant="body2" className="flex justify-between">GST and Restaurant Charges <span>€{gstAndRestaurantCharges}</span></Typography> */}
+                {isDeliveryOrder && (
+                    <>
+                        <Typography variant="body2" className="flex justify-between">Delivery Fee<span className={!deliveryFee ? `text-emerald-600 text-xs cursor-pointer` : ''} onClick={handleDeliveryAddress}>{!isCustomerDetailsPresent ? 'Add Delivery Address' : `€${deliveryFee}`}</span></Typography>
+                        <Typography variant="caption" className="text-gray-500">This fee fairly goes to our delivery partners for delivering your food</Typography>
+                        <Typography variant="body2" className={`flex justify-between ${deliveryTip ? '' : 'text-orange-500 cursor-pointer'} `}>Delivery Tip {deliveryTip ? <span>€{deliveryTip}</span> : (isFreeDelivery ? <span>Free</span> : <span onClick={addTipToDelivery}>Add tip</span>)}</Typography>
+                    </>)}{/* <Typography variant="body2" className="flex justify-between">GST and Restaurant Charges <span>€{gstAndRestaurantCharges}</span></Typography> */}
                 <Divider className="my-2" />
                 <Typography variant="body1" className="flex justify-between font-semibold">
                     To Pay

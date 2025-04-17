@@ -6,9 +6,9 @@ import { UserAddress } from "@/app/utils/types/address_type";
 
 
 interface AddressSectionProps {
-  userAddress: UserAddress[]; // Image URL passed as a prop
+  userAddress: UserAddress; // Image URL passed as a prop
 }
-const AddressSection: React.FC<AddressSectionProps> = ({userAddress}) => {
+const AddressSection: React.FC<AddressSectionProps> = () => {
   return (
     <Card className="flex items-center mt-4 p-3 border border-gray-300 shadow-sm rounded-lg w-full">
       {/* Icon Section */}
@@ -20,7 +20,7 @@ const AddressSection: React.FC<AddressSectionProps> = ({userAddress}) => {
       {/* Delivery Info */}
       <CardContent className="flex-1 ml-4 p-0">
         <h3 className="text-lg font-semibold">Deliver to Home</h3>
-        <p className="text-sm text-gray-500">{userAddress[0]?.street||''}</p>
+        <p className="text-sm text-gray-500">{''}</p>
         <p className="text-sm font-bold">35-40 MINS</p>
       </CardContent>
 

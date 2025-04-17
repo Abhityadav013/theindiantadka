@@ -18,7 +18,7 @@ const AddressOptions: React.FC<AddressOptionsProps> = ({ userAddress, onClose })
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Array.isArray(userAddress) && userAddress.map((address) => (
                     <Card
-                        key={address.flatNumber}
+                        key={address.town}
                         className="p-4 flex flex-col justify-between"
                         sx={{
                             minHeight: '300px',

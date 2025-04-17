@@ -1,37 +1,75 @@
+'use client'
 import React, { useCallback, useEffect, useState } from 'react'
-import AddNewAddress, { AddressInput } from '../AddNewAddress'
+import AddNewAddress, { AddressInput, UserInfo } from '../AddNewAddress'
 import { UserAddress } from '@/app/utils/types/address_type';
 import { AppDispatch } from '@/app/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/app/redux/reducers';
 import { getLocationData } from '@/app/utils/location_data';
+import { ErrorResponse } from '../Navbar';
+import axios from 'axios';
+import { CustomerDetails, CustomerOrder } from '@/app/utils/types/customer_details_type';
+import { OrderType } from '@/app/models/Order';
+import { closeCustomerDetailsModel } from '@/app/redux/reducers/customerDetailsReducer';
+
 
 const AddressForm = () => {
   const [isAddressFetched, setIsAddressFetched] = useState(false)
   const [isLoading, setIsLoading] = useState(true);
+  const [formError, setFormError] = React.useState<ErrorResponse>([]);
   const isMobile = useSelector((state: RootState) => state.mobile.isMobile);
-  const { addressModel: isAddressModelOpen, address, userAddress } = useSelector((state: RootState) => state.address);
+  const { address, userAddress } = useSelector((state: RootState) => state.address);
+  const {customerDetailsFormError, customerDetailsModel: isAddressModelOpen, customerOrder } = useSelector((state: RootState) => state.customerDetails);
   const dispatch = useDispatch<AppDispatch>();
-  const onSubmit = (values: AddressInput) => {
-    const userAddress: UserAddress = {
-      ...values,
-      displayAddress: `${values.street} ${values.buildingNumber}, ${values.pincode} ${address?.village ?? ''} ${address?.town ?? ''},${address.country}`,
+  const onSubmit = (values: { userInfo: UserInfo, orderType: OrderType, address?: AddressInput }) => {
+    let userAddress: UserAddress = {
+      displayAddress: '',
+      buildingNumber: '',
+      street: '',
+      town: '',
+      pincode: '',
+      addressType: ''
+    };
+    const customerDetails: CustomerDetails = {
+      name: values.userInfo.name,
+      phoneNumber: values.userInfo.phoneNumber,
+      address: userAddress,
+      
     }
-    dispatch({ type: 'address/updateUserAddress', payload: userAddress })
-    dispatch({ type: "address/closeAddressModel" });
+    if (values.address) {
+      userAddress = {
+        displayAddress: `${values.address?.street} ${values.address?.buildingNumber}, ${values.address?.pincode} ${values.address.town ?? ''}, Germany`,
+        buildingNumber: values.address?.buildingNumber ?? '',
+        street: values.address?.street ?? '',
+        town: values.address?.town ?? '',
+        pincode: values.address?.pincode ?? '',
+        addressType: values.address?.addressType ?? ''
+      }
+      customerDetails.address = userAddress;
+    }
+    const payload: CustomerOrder = {
+      customerDetails: customerDetails,
+      orderType: values.orderType
+    }
+    dispatch({ type: 'customerDetails/updateCustomerDetailsSuccess', payload });
   };
 
 
-  //   const onSubmit = (values: AddressInput) => {
-  //     const userAddress: UserAddress = {
-  //       ...values,
-  //       displayAddress: `${values.street} ${values.buildingNumber}, ${values.pincode} ${address?.village ?? ''} ${address?.town ?? ''},${address.country}`,
-  //     }
-  //     dispatch({ type: 'address/updateUserAddress', payload: userAddress })
-  //   };
+  useEffect(() => {
+    const fetchLocationInsights = async () => {
+      if (customerDetailsFormError.length > 0) {
+        setFormError(customerDetailsFormError);
+      }
+      if (customerDetailsFormError.length === 0) {
+        dispatch(closeCustomerDetailsModel());
+      }
+    };
+
+    fetchLocationInsights();
+  }, [dispatch, customerDetailsFormError]);
 
   const closeAddressDrawer = useCallback(() => {
-    dispatch({ type: "address/closeAddressModel" });
+    dispatch(closeCustomerDetailsModel());
   }, [dispatch])
 
 
@@ -54,6 +92,9 @@ const AddressForm = () => {
           }
         } catch (error) {
           console.error("Invalid location data in localStorage", error);
+          if (axios.isAxiosError(error)) {
+            setFormError(error.response?.data?.data);
+          }
         }
       }
     };
@@ -69,10 +110,9 @@ const AddressForm = () => {
     }
 
   }, [dispatch, closeAddressDrawer, isLoading, address, userAddress, isAddressFetched]);
-
   return (
     <div>
-      <AddNewAddress onSubmit={onSubmit} isOpen={isAddressModelOpen} onClose={closeAddressDrawer} address={address} isMobile={isMobile} />
+      <AddNewAddress formValues={customerOrder ?? {} as CustomerOrder} onSubmit={onSubmit} isOpen={isAddressModelOpen} onClose={closeAddressDrawer} address={address} isMobile={isMobile} error={formError} setFormError={setFormError} />
     </div>
   )
 }

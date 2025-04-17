@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
+import scrollbarHide from "tailwind-scrollbar-hide";
 
-export default {
+const config: Config = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -11,9 +12,11 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        tomato: '#FF6347',  // This is the tomato color hex code
+        tomato: "#FF6347",
       },
     },
   },
-  plugins: [],
-} satisfies Config;
+  plugins: [scrollbarHide],
+};
+
+export default config;

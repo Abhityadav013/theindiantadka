@@ -10,6 +10,7 @@ import theme from "./theme";
 import LoginDrawer from "./components/LoginDrawer";
 import CookieConsentPopup from "./components/CookiesConset";
 import AddressDetector from "./components/AddressDetector";
+import AddressForm from "./components/MobileView/AddressForm";
 
 
 // Configure the Outfit font
@@ -43,6 +44,7 @@ export default function RootLayout({
               <LoginDrawer />
             {/* Include MobileViewDetector */}
               {children}
+              <AddressForm />
               <Analytics/>
             </ThemeProvider>
           </body>

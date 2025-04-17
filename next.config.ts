@@ -10,7 +10,11 @@ const nextConfig:NextConfig = {
     NEXT_PUBLIC_PAYPAL_BASE_URL: process.env.NEXT_PUBLIC_PAYPAL_BASE_URL
   },
   images: {
-    domains: ['testing.indiantadka.eu','https://www.google.com/','http://localhost:5000/api/v1'], // Add your image domain here
+    domains: ['testing.indiantadka.eu',
+      'https://www.google.com/',
+      'http://localhost:5000/api/v1',
+      'www.paypalobjects.com',
+      'stripe.com'], // Add your image domain here
   },
 };
 
