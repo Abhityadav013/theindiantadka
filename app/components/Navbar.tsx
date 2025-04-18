@@ -26,6 +26,7 @@ export type ErrorResponse = FieldError[];
 const NavBar = () => {
   const cart = useSelector((state: RootState) => state.cart.cart);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   const navLinks = [
     { label: 'Menu', href: '/menu' },
@@ -34,6 +35,10 @@ const NavBar = () => {
     { label: 'Contact Us', href: '/contact-us' },
     { label: 'Reservation', href: '/reservation' }
   ];
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <>
@@ -50,6 +55,9 @@ const NavBar = () => {
               backgroundColor: "transparent",
               textTransform: "none",
               fontFamily: "var(--font-outfit)",
+              fontSize: '16px',
+              top: '20px',
+              marginBottom: '5px',
               "&:hover": {
                 backgroundColor: "transparent",
                 transform: "translateY(-2px) scale(1.05)",
@@ -63,21 +71,27 @@ const NavBar = () => {
       </div>
 
       {/* Cart Icon + Hamburger for Mobile */}
-      <Box className="relative flex items-center ml-4 md:ml-6">
-        <Link href="/checkout">
+      <Box className="relative flex items-center ml-4 mr-[10%] md:ml-2" sx={{
+        top: '20px',
+        marginBottom: '5px',
+      }}>
+        <Link href="/checkout" className="flex items-center">
           <Image
             src="https://testing.indiantadka.eu/assets/basket_icon.png"
             alt="Cart Icon"
-            width={24}
-            height={24}
-            className="dark:invert sm:w-[20px]"
+            width={100}
+            height={100}
+            className="dark:invert w-[20px] sm:w-[28px] md:w-[36px] lg:w-[44px]"
           />
+          {isClient && cart.length > 0 && (
+            <div
+              className="absolute top-0 right-10 sm:right-7 bg-tomato text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-semibold
+    sm:w-5 sm:h-5 sm:text-[8px] md:w-4 md:h-4 md:text-xs" // Adjusted for mobile and tablet screens
+            >
+              {cart.length}
+            </div>
+          )}
         </Link>
-        {cart.length > 0 && (
-          <span className="absolute top-[-10px] right-[30px] w-[18px] h-[18px] bg-red-500 border-2 border-white text-white text-xs font-bold flex items-center justify-center rounded-full shadow-md">
-            {cart.length}
-          </span>
-        )}
 
         {/* Hamburger icon only on mobile */}
         <div className="md:hidden ml-4">
@@ -86,6 +100,7 @@ const NavBar = () => {
           </IconButton>
         </div>
       </Box>
+
 
       {/* Drawer */}
       <Drawer

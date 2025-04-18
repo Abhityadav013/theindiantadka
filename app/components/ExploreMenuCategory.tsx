@@ -25,9 +25,8 @@ const ExploreMenuCategory: React.FC<ExploreMenuProps> = ({ menu_list }) => {
       {menu_list?.map((item, index) => (
         <Box
           key={index}
-          className={`cursor-pointer flex flex-col items-center justify-center text-center border-2 rounded-full p-1 transition-colors duration-200 ${
-            category === item.menu_name ? "border-[tomato]" : "border-transparent"
-          }`}
+          className={`cursor-pointer flex flex-col items-center justify-center text-center border-2 rounded-full p-1 transition-colors duration-200 ${category === item.menu_name ? "border-[tomato]" : "border-transparent"
+            }`}
           onClick={() =>
             setFoodCategory((prev) => ({
               category: prev.category === item.menu_name ? "All" : item.menu_name,

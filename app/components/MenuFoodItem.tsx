@@ -44,7 +44,7 @@ const MenuFoodItem: React.FC<MenuFoodItemProps> = ({ food_item }) => {
   };
 
   return (
-    <Card className="w-full max-w-xs rounded-xl shadow-md hover:shadow-lg transition-transform hover:scale-[1.03] flex flex-col">
+    <Card className="w-full max-w-xs flex flex-col">
       {/* Image Section */}
       <Box className="relative w-full h-[180px] sm:h-[200px] overflow-hidden rounded-t-xl">
         <Image

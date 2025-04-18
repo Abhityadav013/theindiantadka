@@ -40,7 +40,7 @@ const FoodDisplayWrapper: React.FC<FoodDisplayProps> = ({ food_list }) => {
 
       {/* Sticky Search Bar */}
       <Box
-        className="sticky z-20 top-[84px] sm:top-[100px] bg-white border-b border-gray-300 p-4"
+        className="sticky z-20 top-[84px] sm:top-[70px] bg-white border-b border-gray-300 p-4"
       >
         <Typography
           variant="h5"
@@ -48,7 +48,7 @@ const FoodDisplayWrapper: React.FC<FoodDisplayProps> = ({ food_list }) => {
           fontWeight={600}
           className="text-xl mb-3"
         >
-          Top dishes near you
+          Top dishes
         </Typography>
         <TextField
           label="Search Food"
@@ -64,16 +64,17 @@ const FoodDisplayWrapper: React.FC<FoodDisplayProps> = ({ food_list }) => {
       {/* Food Grid with margin from bottom */}
       <Grid
         container
-        spacing={2}
+        spacing={1} // Adjusted to 1 (8px)
         className="mt-4"
-        sx={{ paddingBottom: "120px" }} // Adjust this padding to prevent overlap with the sticky bar
+        sx={{ paddingBottom: "120px", margin: "-5px" }} // Apply custom margin or padding
       >
         {filteredFoodList.map((item) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
+          <Grid item xs={12} sm={6} md={4} lg={3} key={item.id} sx={{ padding: "5px" }}> {/* Add padding to the item */}
             <MenuFoodItem food_item={item} />
           </Grid>
         ))}
       </Grid>
+
     </Box>
   );
 };
