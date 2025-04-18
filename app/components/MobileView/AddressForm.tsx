@@ -19,7 +19,7 @@ const AddressForm = () => {
   const [formError, setFormError] = React.useState<ErrorResponse>([]);
   const isMobile = useSelector((state: RootState) => state.mobile.isMobile);
   const { address, userAddress } = useSelector((state: RootState) => state.address);
-  const {customerDetailsFormError, customerDetailsModel: isAddressModelOpen, customerOrder } = useSelector((state: RootState) => state.customerDetails);
+  const { customerDetailsFormError, customerDetailsModel: isAddressModelOpen, customerOrder, isFormError } = useSelector((state: RootState) => state.customerDetails);
   const dispatch = useDispatch<AppDispatch>();
   const onSubmit = (values: { userInfo: UserInfo, orderType: OrderType, address?: AddressInput }) => {
     let userAddress: UserAddress = {
@@ -34,7 +34,7 @@ const AddressForm = () => {
       name: values.userInfo.name,
       phoneNumber: values.userInfo.phoneNumber,
       address: userAddress,
-      
+
     }
     if (values.address) {
       userAddress = {
@@ -51,22 +51,18 @@ const AddressForm = () => {
       customerDetails: customerDetails,
       orderType: values.orderType
     }
-    dispatch({ type: 'customerDetails/updateCustomerDetailsSuccess', payload });
+    dispatch({ type: 'customerDetails/updateCustomerDetails', payload });
   };
 
-
   useEffect(() => {
-    const fetchLocationInsights = async () => {
-      if (customerDetailsFormError.length > 0) {
-        setFormError(customerDetailsFormError);
-      }
-      if (customerDetailsFormError.length === 0) {
-        dispatch(closeCustomerDetailsModel());
-      }
-    };
-
-    fetchLocationInsights();
-  }, [dispatch, customerDetailsFormError]);
+    // Set form errors when there's any error in the form
+    if (customerDetailsFormError.length > 0) {
+      setFormError(customerDetailsFormError);
+    }
+    if (customerDetailsFormError.length === 0 && !isFormError) {
+      dispatch(closeCustomerDetailsModel());
+    }
+  }, [dispatch, customerDetailsFormError, isFormError]);
 
   const closeAddressDrawer = useCallback(() => {
     dispatch(closeCustomerDetailsModel());

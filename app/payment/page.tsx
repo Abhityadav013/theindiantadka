@@ -111,27 +111,22 @@ const Checkout = () => {
     (customerOrder && customerOrder.orderType === OrderType.DELIVERY) || false;
 
   return (
-    <div className="flex items-center h-screen justify-center min-h-screen w-full">
+    <div className="flex items-center justify-center w-full mb-15">
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className={`bg-white h-screen ${isMobileView ? 'w-screen p-4' : 'w-[1350px]'}`}>
+        <Card className={`bg-white min-h-screen ${isMobileView ? 'w-screen p-4' : 'w-[850px]'}`}>
           {/* Title */}
           <div className="flex items-center justify-between mb-4">
-            {/* Back Icon on the left */}
             <IconButton onClick={onBack} aria-label="back">
               <ArrowBackIcon />
             </IconButton>
-
-            {/* Centered Title */}
             <Typography variant="h5" className="font-semibold flex-1 text-center">
               Checkout
             </Typography>
-
-            {/* Placeholder to keep spacing balanced */}
-            <div className="w-10" /> {/* Same width as IconButton to balance layout */}
+            <div className="w-10" />
           </div>
 
           {/* Order Summary */}
@@ -145,6 +140,7 @@ const Checkout = () => {
             isFreeDelivery={isFreeDelivery}
           />
           <Divider className="my-2" />
+
           {/* Payment Method Selection */}
           <Box>
             <Typography variant="h6" className="font-semibold">
@@ -153,43 +149,41 @@ const Checkout = () => {
               </IconButton>
               Pay via
             </Typography>
-            <Box sx={{marginLeft:'20px',marginTop:'5px'}}>
-            <FormControl component="fieldset" fullWidth>
-              <RadioGroup
-                aria-label="payment-method"
-                value={paymentMethod}
-                onChange={handlePaymentMethodChange}
-                className="space-y-4"
-              >
-                <FormControlLabel
-                  value="paypal"
-                  control={<Radio />}
-                  label={
-                    <span className="flex items-center gap-2">
-                      <Image src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" width={24} height={24} />
-                      Pay with PayPal
-                    </span>
-                  }
-                />
-                <FormControlLabel
-                  value="stripe"
-                  control={<Radio />}
-                  label={
-                    <span className="flex items-center gap-2">
-                      <Image src="https://stripe.com/img/v3/home/twitter.png" alt="Stripe" width={24} height={24} />
-                      Pay with Stripe
-                    </span>
-                  }
-                />
-              </RadioGroup>
-            </FormControl>
+            <Box sx={{ marginLeft: '20px', marginTop: '5px' }}>
+              <FormControl component="fieldset" fullWidth>
+                <RadioGroup
+                  aria-label="payment-method"
+                  value={paymentMethod}
+                  onChange={handlePaymentMethodChange}
+                  className="space-y-4"
+                >
+                  <FormControlLabel
+                    value="paypal"
+                    control={<Radio />}
+                    label={
+                      <span className="flex items-center gap-2">
+                        <Image src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" width={24} height={24} />
+                        Pay with PayPal
+                      </span>
+                    }
+                  />
+                  <FormControlLabel
+                    value="stripe"
+                    control={<Radio />}
+                    label={
+                      <span className="flex items-center gap-2">
+                        <Image src="https://stripe.com/img/v3/home/twitter.png" alt="Stripe" width={24} height={24} />
+                        Pay with Stripe
+                      </span>
+                    }
+                  />
+                </RadioGroup>
+              </FormControl>
             </Box>
-        
           </Box>
 
-
           {/* Payment Components */}
-          <div className="mt-6">
+          <div className="ml-[10%] mt-8 mb-5 sm:ml-0">
             {paymentMethod === 'paypal' && amountInCents > 0 && cart.length > 0 && (
               <PaypalComponent amount={amountInCents} />
             )}

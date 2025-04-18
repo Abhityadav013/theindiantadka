@@ -32,10 +32,10 @@ const PaymentCheckoutCart: React.FC<PaymentCheckoutCartProps> = ({foodItem,cart}
       
         {/* Table Header */}
         <div className="flex justify-between mb-2 text-sm font-semibold text-gray-600">
-          <div className="w-[55%]">Item Name</div>
-          <div className="w-[27%]">Qty</div>
-          <div className="w-[20%] text-right">Price</div>
-        </div>
+  <div className="w-[70%] sm:w-[80%]">Item Name</div> {/* Mobile: 70%, Big Screen: 80% */}
+  <div className="w-[10%]">Qty</div>
+  <div className="w-[10%] text-right">Price</div>
+</div>
       
         {/* Scrollable Items List */}
         <Box className="max-h-[20vh] overflow-y-auto scrollbar-hide">
@@ -49,12 +49,12 @@ const PaymentCheckoutCart: React.FC<PaymentCheckoutCartProps> = ({foodItem,cart}
                 key={index}
                 className="flex justify-between gap-4 my-4 items-center"
               >
-                <div className="w-[55%]">
+                <div className="w-[80%]">
                   <Typography variant="body2" className="text-gray-700 text-sm">
                     {item.itemName}
                   </Typography>
                 </div>
-                <div className="w-[25%] flex items-center gap-2 justify-between">
+                <div className="w-[8%] flex items-center gap-2 justify-between">
                   <Typography
                     variant="body2"
                     className="font-semibold text-green-600 text-sm"
@@ -62,7 +62,7 @@ const PaymentCheckoutCart: React.FC<PaymentCheckoutCartProps> = ({foodItem,cart}
                     {quantity}
                   </Typography>
                 </div>
-                <div className="w-[20%] flex justify-end items-center">
+                <div className="w-[10%] flex justify-end items-center">
                   <Typography
                     variant="body2"
                     className="font-semibold text-gray-800 text-sm"

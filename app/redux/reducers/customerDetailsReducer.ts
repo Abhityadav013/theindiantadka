@@ -19,6 +19,7 @@ interface CustomerDetailsState {
   customerDetailsFormError: ValidationErrors;
   isCustomerDetailsPresent: boolean;
   isCustomerInformationSaved: boolean;
+  isFormError: boolean;
   userLocation: UserLocation | null;
   isUserLocationPresent: boolean;
   isOrderDeliverableAddress: boolean;
@@ -34,6 +35,7 @@ const initialState: CustomerDetailsState = {
   isCustomerInformationSaved: false,
   isUserLocationPresent: false,
   userLocation: null,
+  isFormError: false,
   isOrderDeliverableAddress: true,
   loading: false,
   error: null,
@@ -54,6 +56,10 @@ const customerDetailsSlice = createSlice({
       state.customerDetails = action.payload;
       state.isCustomerDetailsPresent =
         action.payload && Object.keys(action.payload).length > 0;
+      state.isFormError = false;
+      if (!state.isFormError) {
+        state.customerDetailsFormError = [];
+      }
       state.loading = false;
     },
     fetchCustomerOrderSuccess: (
@@ -87,6 +93,12 @@ const customerDetailsSlice = createSlice({
     updateCustomerDetailsStart: (state) => {
       state.loading = true;
     },
+    updateCustomerDetails: (state, action: PayloadAction<CustomerOrder>) => {
+      state.customerDetails = action.payload.customerDetails;
+      state.customerOrder = action.payload;
+      state.isCustomerInformationSaved = true;
+      state.loading = false;
+    },
     updateCustomerDetailsSuccess: (
       state,
       action: PayloadAction<CustomerOrder>,
@@ -109,6 +121,7 @@ const customerDetailsSlice = createSlice({
           ? action.payload
           : [];
       }
+      state.isFormError = true;
       state.loading = false;
     },
     openCustomerDetailsModel: (state) => {
@@ -131,6 +144,7 @@ export const {
   fetchCustomerLocationStart,
   fetchIsOrderDeliverableAddress,
   updateCustomerDetailsStart,
+  updateCustomerDetails,
   updateCustomerDetailsSuccess,
   updateCustomerDetailsFailure,
   openCustomerDetailsModel,

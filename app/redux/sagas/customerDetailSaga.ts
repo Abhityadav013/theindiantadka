@@ -131,7 +131,7 @@ export function* watchCustomerDetailsActions() {
     fetchCustomerDetailsSaga,
   );
   yield takeLatest(
-    'customerDetails/updateCustomerDetailsSuccess',
+    'customerDetails/updateCustomerDetails',
     updateCustomerDetailsSaga,
   );
 }

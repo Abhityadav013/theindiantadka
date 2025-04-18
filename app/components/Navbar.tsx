@@ -16,13 +16,11 @@ import { RootState } from '../redux/reducers';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 
-// Type for a single error message
 interface FieldError {
   key: string;
   message: string;
 }
 
-// Type for the error response
 export type ErrorResponse = FieldError[];
 
 const NavBar = () => {
@@ -40,7 +38,7 @@ const NavBar = () => {
   return (
     <>
       {/* Desktop Nav */}
-      <div className="hidden md:flex items-center space-x-6">
+      <div className="hidden md:flex items-center justify-center space-x-6 w-full">
         {navLinks.map(({ label, href }) => (
           <Button
             key={href}

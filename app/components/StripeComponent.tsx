@@ -17,18 +17,21 @@ interface StripeComponentProps{
 }
 const StripeComponent:React.FC<StripeComponentProps> = ({amount}) => {
     return (
-        <div>
-            <Elements
-                stripe={stripePromise}
-                options={{
-                    mode: 'payment',
-                    amount: amount,
-                    currency: 'eur',
-                    locale:'en',
-                }}>
-                <CheckoutPage amount={amount}/>
-            </Elements>
-        </div>
+        <div className="flex justify-center items-center mt-8 overflow-x-auto"> {/* Add overflow-x-auto for scroll if needed */}
+      <div className="w-full sm:w-[80%] md:w-[60%] lg:w-[50%]"> {/* Container width responsive */}
+        <Elements
+          stripe={stripePromise}
+          options={{
+            mode: 'payment',
+            amount: amount,
+            currency: 'eur',
+            locale: 'en',
+          }}
+        >
+          <CheckoutPage amount={amount} />
+        </Elements>
+      </div>
+    </div>
     )
 }
 
