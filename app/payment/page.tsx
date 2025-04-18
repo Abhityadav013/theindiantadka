@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, Typography, Radio, RadioGroup, FormControlLabel, FormControl, IconButton, Box, Divider } from '@mui/material';
 import Image from 'next/image';
@@ -24,6 +24,8 @@ const Checkout = () => {
   const [deliveryTip, setDeliveryTip] = useState<number | null>(null);
   const [deliveryFee, setDeliveryFee] = useState<string | null>(null);
   const [isFreeDelivery, setFreeDelivery] = useState<boolean>(false);
+  const [isStripeLoaded, setIsStripeLoaded] = React.useState(false);
+  const stripeRef = useRef<HTMLDivElement | null>(null);
   const { cart } = useSelector((state: RootState) => state.cart);
   const foodItems: FoodItem[] = useSelector((state: RootState) => state.menu.foodMenuItems);
   const isMobileView = useSelector((state: RootState) => state.mobile.isMobile); // Responsive state
@@ -52,7 +54,6 @@ const Checkout = () => {
     return () => clearInterval(intervalId);
   }, [deliveryTip]);
 
-
   const filteredFoodItems = foodItems.filter((food) =>
     cart.some(cartItem => cartItem.itemId === food.id && cartItem.quantity > 0)
   );
@@ -64,6 +65,15 @@ const Checkout = () => {
   };
 
   useEffect(() => {
+    if (isStripeLoaded) {
+      // Delay scroll until after Stripe component has been fully loaded/rendered
+      setTimeout(() => {
+        stripeRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 500); // Adjust delay if needed
+    }
+  }, [isStripeLoaded]); // Trigger scroll when Stripe component is loaded
+
+  useEffect(() => {
     if (isCustomerDetailsPresent) {
       if (customerDetails?.deliveryFee) {
         setDeliveryFee(customerDetails.deliveryFee)
@@ -72,7 +82,7 @@ const Checkout = () => {
         setFreeDelivery(customerDetails.isFreeDelivery)
       }
     }
-  }, [isCustomerDetailsPresent, customerDetails])
+  }, [isCustomerDetailsPresent, customerDetails]);
 
   useEffect(() => {
     const checkCartTotalAmount = () => {
@@ -93,6 +103,7 @@ const Checkout = () => {
 
     fetchAmountInCents();
   }, [cartTotal]);
+
   if (!loading && amountInCents <= 0 || (cart.length === 0 && filteredFoodItems.length === 0)) {
     return (
       <div className="flex items-center justify-center h-screen space-x-2">
@@ -104,7 +115,8 @@ const Checkout = () => {
   }
 
   const handlePaymentMethodChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPaymentMethod(event.target.value as 'paypal' | 'stripe');
+    const selectedMethod = event.target.value as 'paypal' | 'stripe';
+    setPaymentMethod(selectedMethod);
   };
 
   const isDeliveryOrder =
@@ -188,13 +200,16 @@ const Checkout = () => {
               <PaypalComponent amount={amountInCents} />
             )}
             {paymentMethod === 'stripe' && amountInCents > 0 && cart.length > 0 && (
-              <StripeComponent amount={amountInCents} />
+               <div ref={stripeRef}>
+              <StripeComponent amount={amountInCents} 
+              onLoad={() => setIsStripeLoaded(true)}  // Set it to true once Stripe is loaded
+               />
+               </div>
             )}
           </div>
         </Card>
       </motion.div>
     </div>
-
   );
 };
 

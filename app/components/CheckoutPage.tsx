@@ -7,9 +7,10 @@ import {  CircularProgress, Box } from '@mui/material';
 
 interface StripeCheckoutProps{
     amount:number,
+    onClientSecretLoad:()=>void
 }
 
-const CheckoutPage:React.FC<StripeCheckoutProps> = ({amount}) => {
+const CheckoutPage:React.FC<StripeCheckoutProps> = ({amount,onClientSecretLoad}) => {
     const stripe = useStripe();
     const elements = useElements();
     const [errorMessage, setErrorMessage] = useState<string>();
@@ -26,8 +27,11 @@ const CheckoutPage:React.FC<StripeCheckoutProps> = ({amount}) => {
             body: JSON.stringify({ amount: amount })
         })
             .then(res => res.json())
-            .then((data) => setClientSecret(data.clientSecret));
-    }, [amount]);
+            .then((data) => {
+                setClientSecret(data.clientSecret);
+                onClientSecretLoad();
+            });
+    }, [amount, onClientSecretLoad]);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         console.log('Stripe Payment')
@@ -47,7 +51,7 @@ const CheckoutPage:React.FC<StripeCheckoutProps> = ({amount}) => {
             elements,
             clientSecret,
             confirmParams: {
-                return_url: 'https://theindiantadka.vercel.app/payment-success',
+                return_url: 'http://localhost:3000/payment-success',
             },
         });
         console.log('Stripe DOne',response)

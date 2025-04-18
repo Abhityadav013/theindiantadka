@@ -14,8 +14,9 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY)
 
 interface StripeComponentProps{
     amount:number,
+    onLoad: () => void 
 }
-const StripeComponent:React.FC<StripeComponentProps> = ({amount}) => {
+const StripeComponent:React.FC<StripeComponentProps> = ({amount,onLoad}) => {
     return (
         <div className="flex justify-center items-center mt-8 overflow-x-auto"> {/* Add overflow-x-auto for scroll if needed */}
       <div className="w-full sm:w-[80%] md:w-[60%] lg:w-[50%]"> {/* Container width responsive */}
@@ -28,7 +29,7 @@ const StripeComponent:React.FC<StripeComponentProps> = ({amount}) => {
             locale: 'en',
           }}
         >
-          <CheckoutPage amount={amount} />
+          <CheckoutPage amount={amount} onClientSecretLoad={onLoad}/>
         </Elements>
       </div>
     </div>

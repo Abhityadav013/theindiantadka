@@ -34,7 +34,6 @@ const PaymentSuccess = () => {
         const data = await response.json();
         if (response.ok) {
           dispatch({ type: "cart/updateCartOrderCreatedSaga" });
-          dispatch({ type: "cart/fetchCartSaga" });
           setIsOrderSuccess(true); // trigger countdown
         } else {
           throw new Error(data.message || 'Failed to create order');
@@ -59,6 +58,11 @@ const PaymentSuccess = () => {
   useEffect(() => {
     if (countdown === null) return;
 
+    if (countdown === 1) {
+      dispatch({ type: "cart/fetchCartSaga" }); // 🔥 Dispatch 1 second before navigation
+    }
+
+
     if (countdown === 0) {
       router.push('/');
       return;
@@ -69,7 +73,7 @@ const PaymentSuccess = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [countdown, router]);
+  }, [countdown, router, dispatch]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
