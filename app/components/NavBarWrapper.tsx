@@ -13,6 +13,7 @@ const NavBarWrapper = () => {
       sx={{
         backgroundColor: "white",
         boxShadow: "none",
+        height: "100px", // Increase height by 10px (default height is around 60px)
       }}
     >
       <Toolbar className="px-4 md:px-0">
