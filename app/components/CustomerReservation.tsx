@@ -49,6 +49,17 @@ export default function Reservation() {
         document.body.style.visibility = 'visible'; // Ensures body is visible once styles are loaded
     }, []);
 
+    useEffect(() =>{
+        if(openConfirmDialog){
+            setTimeout(() => {
+                // Simulating fetched data
+             
+            }, 1000); // Simulate a delay of 3 seconds
+            setLoadingTableData(true); // Stop loading after data is set
+        }
+      
+    },[openConfirmDialog])
+
     useEffect(() => {
         const fetchReservation = async () => {
             const ssid = localStorage.getItem('ssid');
@@ -166,7 +177,7 @@ export default function Reservation() {
         if (!editingId) return;
         try {
 
-            const response = await fetch('/api/reservation/${editingId}', {
+            const response = await fetch(`/api/reservation/${editingId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -198,7 +209,9 @@ export default function Reservation() {
         }
     };
 
+
     const handleOpenConfirmDialog = (reservationId: string) => {
+      
         setSelectedReservationId(reservationId);
         setOpenConfirmDialog(true);
     };
@@ -213,10 +226,16 @@ export default function Reservation() {
 
         try {
             await deleteReservation(selectedReservationId);
+            
             setReservations((prev) =>
                 prev.filter((reservation) => reservation.id !== selectedReservationId)
             );
             handleCloseConfirmDialog();
+
+            setTimeout(() => {
+                // Simulating fetched data
+                setLoadingTableData(false); // Stop loading after data is set
+            }, 1000); // Simulate a delay of 3 seconds
         } catch (error) {
             console.error('Failed to delete reservation:', error);
         }

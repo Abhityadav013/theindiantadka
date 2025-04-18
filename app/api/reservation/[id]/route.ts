@@ -25,9 +25,11 @@ export async function PUT(
   context: any
 ) {
   await connectToDatabase();
-  const {params} = context
+
+  const {params} = await context
+
   // No need to wrap params in await
-  const { id: reservationId } = params; // Directly access params without await
+  const { id: reservationId } = await params; // Directly access params without await
   const payload = await request.json();
 
   const { reservationName, phoneNumber, numberOfPeople, reservationDateTime } = payload;
