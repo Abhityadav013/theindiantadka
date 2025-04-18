@@ -1,11 +1,20 @@
-"use client";
-import Image from "next/image";
-import Link from "next/link";
-import React from "react";
-import { Box } from "@mui/material";
-import {  useSelector } from "react-redux";
-import { RootState } from "../redux/reducers";
-import { Cart } from "../utils/types/cart_type";
+'use client';
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { useState } from 'react';
+import {
+  Button,
+  Box,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText
+} from '@mui/material';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/reducers';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 
 // Type for a single error message
 interface FieldError {
@@ -17,91 +26,109 @@ interface FieldError {
 export type ErrorResponse = FieldError[];
 
 const NavBar = () => {
-  //const [userDetails, setUserDetails] = useState<UserProfile | null>(null);
- // const [isLoading, setLoading] = useState(true);
-  const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
-  //const { otpModal, otpExpireAt, profile } = useSelector((state: RootState) => state.user);
-  const isMobileView = useSelector((state: RootState) => state.mobile.isMobile);
-  //const dispatch = useDispatch();
+  const cart = useSelector((state: RootState) => state.cart.cart);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // useEffect(() => {
-  //   const isUserLoggedIn = localStorage.getItem("_is_user_logged_in");
-
-  //   if (profile && isUserLoggedIn && Object.keys(profile).length > 0) {
-  //     setLoading(false);
-  //     setUserDetails(profile);
-  //   } else {
-  //     setLoading(false);
-  //   }
-  // }, [profile]);
-
-  // const logoutUser = async () => {
-  //   try {
-  //     const response = await api.post(`${base_url}/logout`, {
-  //       withCredentials: true,
-  //     });
-  //     if (response.data.statusCode === 200) {
-  //       setUserDetails(null);
-  //       dispatch({ type: "cart/fetchCartSaga" });
-  //       localStorage.removeItem("_is_user_logged_in");
-  //       localStorage.setItem('tid', response.data.tid);
-  //       localStorage.setItem('ssid',response.data.deviceId)
-  //     }
-  //   } catch (err) {
-  //     console.error("Error logging out:", err);
-  //   }
-  // };
-
-  // const sendOTP = () => {
-  //   dispatch({ type: "user/fetchProfileOTPSaga" });
-  // };
-  // const verifyOTP = () => { };
-
-  // const resendOTP = () => { };
-
-  // const otpModalClose = () => {
-  //   dispatch({ type: "user/closeOTPModel" });
-  // };
+  const navLinks = [
+    { label: 'Menu', href: '/menu' },
+    { label: 'About', href: '/about' },
+    { label: 'Offer', href: '/offer' },
+    { label: 'Contact Us', href: '/contact-us' },
+    { label: 'Reservation', href: '/reservation' }
+  ];
 
   return (
-      <Box className="flex items-center gap-10 md:gap-7 sm:gap-5">
-        {/* Search Icon */}
+    <>
+      {/* Desktop Nav */}
+      <div className="hidden md:flex items-center space-x-6">
+        {navLinks.map(({ label, href }) => (
+          <Button
+            key={href}
+            component={Link}
+            href={href}
+            disableRipple
+            sx={{
+              color: "#FF6347",
+              backgroundColor: "transparent",
+              textTransform: "none",
+              fontFamily: "var(--font-outfit)",
+              "&:hover": {
+                backgroundColor: "transparent",
+                transform: "translateY(-2px) scale(1.05)",
+                transition: "all 0.3s ease"
+              }
+            }}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
 
-        {/* Cart Icon and Cart Count */}
-        <Box className="relative">
-          {/* ToDo:: Allow this when we have Login Functioanlity */}
-          <Link href={isMobileView ? "/checkout" : "/checkout"}>
-          {/* <Link href={'/order-details'}> */}
-            <Image
-              src="https://testing.indiantadka.eu/assets/basket_icon.png"
-              alt="Cart Icon"
-              width={24}
-              height={24}
-              className="dark:invert sm:w-[20px]"
-            />
-          </Link>
-          {cart.length > 0 && (
-            <span className="absolute top-[-10px] right-[-8px] w-[18px] h-[18px] bg-red-500 border-2 border-white text-white text-xs font-bold flex items-center justify-center rounded-full shadow-md">
-              {cart.length}
-            </span>
-          )}
-        </Box>
-
-        {/* Profile Circle with Account Icon */}
-        {/* { userDetails === null || userDetails?.name === '' ? (
-          <AccountCircleIcon
-            onClick={() => dispatch(setLoginModal(true))}
-            sx={{ fontSize: "30px", borderRadius: "50%", background: "tomato", fill: "azure" }}
+      {/* Cart Icon + Hamburger for Mobile */}
+      <Box className="relative flex items-center ml-4 md:ml-6">
+        <Link href="/checkout">
+          <Image
+            src="https://testing.indiantadka.eu/assets/basket_icon.png"
+            alt="Cart Icon"
+            width={24}
+            height={24}
+            className="dark:invert sm:w-[20px]"
           />
-        ) : (
-          <UserProfileMenu userData={userDetails} logoutUser={logoutUser} sendOTP={sendOTP} />
+        </Link>
+        {cart.length > 0 && (
+          <span className="absolute top-[-10px] right-[30px] w-[18px] h-[18px] bg-red-500 border-2 border-white text-white text-xs font-bold flex items-center justify-center rounded-full shadow-md">
+            {cart.length}
+          </span>
         )}
 
-        {
-          <OTPComponent isOpen={otpModal} onClose={otpModalClose} otpExpiresAt={otpExpireAt} verifyOTP={verifyOTP} resendOTP={resendOTP} />
-        } */}
+        {/* Hamburger icon only on mobile */}
+        <div className="md:hidden ml-4">
+          <IconButton onClick={() => setDrawerOpen(true)}>
+            <MenuIcon sx={{ color: '#FF6347' }} />
+          </IconButton>
+        </div>
       </Box>
-    )
+
+      {/* Drawer */}
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        PaperProps={{
+          sx: {
+            width: '100%',
+            bgcolor: '#fff',
+            padding: 2
+          }
+        }}
+      >
+        <Box display="flex" justifyContent="flex-end">
+          <IconButton onClick={() => setDrawerOpen(false)}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <List>
+          {navLinks.map(({ label, href }) => (
+            <ListItem
+              key={href}
+              component={Link}
+              href={href}
+              onClick={() => setDrawerOpen(false)}
+            >
+              <ListItemText
+                primary={label}
+                primaryTypographyProps={{
+                  fontSize: '1.2rem',
+                  color: '#FF6347',
+                  fontFamily: 'var(--font-outfit)'
+                }}
+              />
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
+    </>
+  );
 };
 
 export default NavBar;

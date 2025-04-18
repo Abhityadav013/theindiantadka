@@ -1,25 +1,39 @@
 import Image from "next/image";
-import Link from "next/link";
 import React from "react";
-import { Box } from "@mui/material";
+import { AppBar, Toolbar, Box } from "@mui/material";
+import Link from "next/link";
 import NavBar from "./Navbar";
 
 const NavBarWrapper = () => {
+  return (
+    <AppBar
+      position="fixed"
+      color="transparent"
+      elevation={0}
+      sx={{
+        backgroundColor: "white",
+        boxShadow: "none",
+      }}
+    >
+      <Toolbar className="px-4 md:px-0">
+        {/* Logo */}
+        <Link href="/" className="ml-[10%]">
+          <Image
+            src="https://testing.indiantadka.eu/assets/IndianTadkaHomeLogo.gif"
+            alt="Logo"
+            width={100}
+            height={100}
+          />
+        </Link>
 
-    return (
-        <Box className="py-5 flex justify-between items-center">
-            <Link href="/">
-                <Image
-                    src="https://testing.indiantadka.eu/logo.jpg"
-                    alt="Logo"
-                    width={80}
-                    height={18}
-                    className="w-[150px] md:w-[140px] sm:w-[120px]"
-                />
-            </Link>
-            <NavBar/>
-        </Box>
-    );
+        {/* Spacer */}
+        <Box sx={{ flexGrow: 1 }} />
+
+        {/* NavBar handles its own responsive rendering */}
+        <NavBar />
+      </Toolbar>
+    </AppBar>
+  );
 };
 
 export default NavBarWrapper;

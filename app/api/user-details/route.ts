@@ -2,12 +2,12 @@ import ApiResponse from '@/app/libs/common/ApiResponse';
 import { OrderType } from '@/app/models/Order';
 import UserInfo from '@/app/models/UserInfo';
 import { NextRequest, NextResponse } from 'next/server';
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { connectToDatabase } from '@/app/libs/mongodb';
 import { UserLocation } from '@/app/utils/types/user_location_type';
 import { fetchCustomerLocationApi, fetchLocationApi } from '@/app/redux/sagas/commonAPIs';
 import { getUserLocationFromLatLon } from '@/app/libs/common/getUserLocation';
 import { Location } from '@/app/utils/types/location_type';
+import validator from 'validator';
 
 // import { isValidNumber } from 'libphonenumber-js';
 export async function POST(request: NextRequest) {
@@ -20,11 +20,10 @@ export async function POST(request: NextRequest) {
     const errors = [];
     // Validate required fields
 
-    const number = parsePhoneNumberFromString(userInfo.phoneNumber, 'DE');
-
     if (userInfo.name == '' || userInfo.phoneNumber == '') {
       const isNameGiven = userInfo.name.trim().length > 0;
       const isPhoneNumberGiven = userInfo.phoneNumber.trim().length > 0;
+      const normalizedPhone = userInfo.phoneNumber.startsWith('+') ? userInfo.phoneNumber : `+${userInfo.phoneNumber}`;
       if (!isNameGiven) {
         errors.push({ key: 'name', message: 'Please enter the name' });
       }
@@ -33,9 +32,14 @@ export async function POST(request: NextRequest) {
           key: 'phoneNumber',
           message: 'Please enter the phone number',
         });
-      } else if (!number || !number.isValid()) {
-        errors.push({ key: 'phoneNumber', message: 'Invalid phone number.' });
+      }     if (
+        !normalizedPhone ||
+        !validator.isMobilePhone(normalizedPhone, 'de-DE')
+      ){
+        errors.push({ key: 'phoneNumber', message: 'Valid German phone number is required.' });
       }
+          
+      
     }
 
     if (errors.length > 0 && orderType === OrderType.PICKUP) {

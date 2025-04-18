@@ -130,3 +130,45 @@ export const fetchStreetsByPostalCode = async (
     return [];
   }
 };
+
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const updateReservation = async (reservationId: string, updatedData: any) => {
+  try {
+    const response = await fetch(`/api/reservation/${reservationId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'reservation-id': reservationId, // You can pass reservationId in the headers
+      },
+      body: JSON.stringify(updatedData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update reservation');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating reservation:', error);
+  }
+};
+
+export const deleteReservation = async (reservationId: string) => {
+  try {
+    const response = await fetch(`/api/reservation/${reservationId}`, {
+      method: 'DELETE',
+      headers: {
+        'reservation-id': reservationId, // Reservation ID passed in headers for deletion
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete reservation');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting reservation:', error);
+  }
+};

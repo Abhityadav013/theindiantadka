@@ -7,7 +7,7 @@ const Header = () => {
       sx={{
         height: { xs: "50vw", sm: "40vw", md: "34vw" },  // Adjust height based on screen size
         mx: "auto",
-        mt: { xs: "15px", sm: "30px" }, // Adjust margin top for smaller screens
+        mt: { xs: "30%", sm: "10%" }, // Adjust margin top for smaller screens
         position: "relative",
         backgroundImage: "url('https://testing.indiantadka.eu/assets/header_img.png')",
         backgroundSize: "contain",
@@ -35,7 +35,7 @@ const Header = () => {
           sx={{
             color: "white",
             fontWeight: "500",
-            fontSize: { xs: "max(6vw,16px)", sm: "max(4.5vw,22px)" }, // Responsive font size
+            fontSize: { xs: "max(5vw,12px)", sm: "max(4.5vw,22px)" }, // Responsive font size
             whiteSpace: "normal", // Prevent text from overflowing
             padding:{xs: "5px"},
             marginBottom:{xs:"10px"}
@@ -43,20 +43,6 @@ const Header = () => {
         >
           Order your favourite food here
         </Typography>
-
-        {/* Description */}
-        {/* <Typography
-          className="text-xs sm:text-sm mt-1"
-          color="white"
-          variant="body2"
-          sx={{
-            display: { xs: "none", sm: "block" },  // Hide on mobile
-            whiteSpace: "normal", // Ensure text wraps and doesn't overflow
-          }}
-        >
-          Choose from a diverse menu featuring a delectable array of dishes crafted with the finest ingredients and culinary expertise.
-          Our mission is to satisfy your craving and elevate your dining experience, one delicious meal at a time.
-        </Typography> */}
       </Box>
     </Box>
   );
