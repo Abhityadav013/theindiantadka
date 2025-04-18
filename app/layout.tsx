@@ -11,7 +11,7 @@ import LoginDrawer from "./components/LoginDrawer";
 import CookieConsentPopup from "./components/CookiesConset";
 import AddressDetector from "./components/AddressDetector";
 import AddressForm from "./components/MobileView/AddressForm";
-
+import { Toaster } from 'react-hot-toast';
 
 // Configure the Outfit font
 const outfit = Outfit({
@@ -36,16 +36,17 @@ export default function RootLayout({
       <GoogleOAuthProvider clientId={String(process.env.GOOGLE_CLIENT_ID)}>
         <html lang="en">
           <body className={`${outfit.variable} app`}> {/* Apply Outfit font */}
+            <Toaster position="top-right" reverseOrder={false} />
             <ThemeProvider theme={theme}>
               <CssBaseline />
-              <CookieConsentPopup/>
+              <CookieConsentPopup />
               <MobileViewDetector />
               <AddressDetector />
               <LoginDrawer />
-            {/* Include MobileViewDetector */}
+              {/* Include MobileViewDetector */}
               {children}
               <AddressForm />
-              <Analytics/>
+              <Analytics />
             </ThemeProvider>
           </body>
         </html>

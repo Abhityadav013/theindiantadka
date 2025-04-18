@@ -9,6 +9,7 @@ import { RootState } from "../redux/store";
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import toast from 'react-hot-toast';
 
 const ContactUs = () => {
     const [message, setMessage] = useState("");
@@ -22,11 +23,45 @@ const ContactUs = () => {
         router.back();
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Message sent:", { name, message });
-        setMessage("");
-        setName("");
+        try {
+
+            const tid = localStorage.getItem('tid'); // Retrieve tid from session storage
+            const ssid = localStorage.getItem('ssid');
+            const response = await fetch("/api/contact-us", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Session-Id': ssid || '', // Add session ID to request headers
+                    Tid: tid || '', // Add tid to request headers
+                },
+                body: JSON.stringify({ name, message }),
+            });
+            if (response.ok) {
+                toast.success("Message sent successfully! 📩", {
+                    duration: 2000, // Show toast for 2 seconds
+                    style: {
+                      padding: "16px 24px", // Adjusted padding
+                      height: "80px", // Fixed height
+                      fontSize: "16px", // Fixed font size
+                      backgroundColor: "#28a745", // Green color for success
+                      color: "#fff", // White text
+                      borderRadius: "10px",
+                    },
+                    iconTheme: {
+                      primary: "#fff", // White icon
+                      secondary: "#28a745", // Green icon
+                    },
+                  });
+                setMessage("");
+                setName("");
+            } else {
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Something went wrong. Please try again.");
+        }
     };
 
     useEffect(() => {
@@ -73,34 +108,34 @@ const ContactUs = () => {
                     </Typography>
 
                     <div className="mb-6 space-y-3 text-sm sm:text-base">
-                    <div className="flex items-center text-gray-600">
-    <LocationOnIcon className="mr-2 text-tomato shrink-0" />
-    <Typography variant="body1" className="font-semibold">
-      Friedrichstraße 69, 66538 Neunkirchen, Germany
-    </Typography>
-  </div>
+                        <div className="flex items-center text-gray-600">
+                            <LocationOnIcon className="mr-2 text-tomato shrink-0" />
+                            <Typography variant="body1" className="font-semibold">
+                                Friedrichstraße 69, 66538 Neunkirchen, Germany
+                            </Typography>
+                        </div>
 
-  {/* Phone */}
-  <div className="flex items-center text-gray-600">
-    <PhoneIcon className="mr-2 text-tomato shrink-0" />
-    <a
-      href="tel:+4915212628877"
-      className="font-semibold underline hover:text-tomato transition"
-    >
-      +49 1521 2628877
-    </a>
-  </div>
+                        {/* Phone */}
+                        <div className="flex items-center text-gray-600">
+                            <PhoneIcon className="mr-2 text-tomato shrink-0" />
+                            <a
+                                href="tel:+4915212628877"
+                                className="font-semibold underline hover:text-tomato transition"
+                            >
+                                +49 1521 2628877
+                            </a>
+                        </div>
 
-  {/* Email */}
-  <div className="flex items-center text-gray-600 overflow-x-auto">
-    <EmailIcon className="mr-2 text-tomato shrink-0" />
-    <a
-      href="mailto:contact@indiantadka.eu"
-      className="font-semibold underline text-xs sm:text-sm hover:text-tomato transition whitespace-nowrap"
-    >
-      contact@indiantadka.eu
-    </a>
-  </div>
+                        {/* Email */}
+                        <div className="flex items-center text-gray-600 overflow-x-auto">
+                            <EmailIcon className="mr-2 text-tomato shrink-0" />
+                            <a
+                                href="mailto:contact@indiantadka.eu"
+                                className="font-semibold underline text-xs sm:text-sm hover:text-tomato transition whitespace-nowrap"
+                            >
+                                contact@indiantadka.eu
+                            </a>
+                        </div>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -123,7 +158,7 @@ const ContactUs = () => {
                         <Button
                             type="submit"
                             variant="contained"
-                            className="w-full bg-tomato hover:bg-red-600 text-white py-2"
+                            className="w-full bg-tomato text-white py-2"
                         >
                             Send Message
                         </Button>
