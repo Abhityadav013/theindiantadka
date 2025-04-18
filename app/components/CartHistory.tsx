@@ -90,31 +90,31 @@ const CartHistory = () => { // Managing checkbox state
     }
 
     return (
-        <Card
-            className="flex flex-col min-h-[100px] w-full justify-between items-center py-3 overflow-y-auto">
-            <CardContent className="p-6">
-                {/* Header Section */}
-                <div className="flex items-center gap-4">
-                    <Image
-                        src="https://testing.indiantadka.eu/assets/food.webp"
-                        alt="Food image for the restaurant menu"
-                        width={50}
-                        height={50}
-                        className="rounded"
-                    />
-                    <Typography variant="h6" className="font-bold text-gray-800">
-                        Your Order
-                    </Typography>
-                </div>
-                <div className="flex justify-between mb-2 text-sm font-semibold text-gray-600">
-                    <div className="w-[55%]">Item Name</div>
-                    <div className="w-[25%]">Qty</div>
-                    <div className="w-[20%] text-right">Price</div>
-                </div>
-                <Divider className="my-2" />
-
-                <Box className="flex flex-col min-h-[100px] justify-between items-center py-3 overflow-y-auto">
-                    {isCartUpdated && <LinearProgress
+        <Card className="flex flex-col min-h-[100px] w-[90%] md:w-[100%] lg:w-[100%] justify-between items-center py-3 overflow-y-auto">
+        <CardContent className="w-[90%]">
+            {/* Header Section */}
+            <div className="flex items-center gap-4">
+                <Image
+                    src="https://testing.indiantadka.eu/assets/food.webp"
+                    alt="Food image for the restaurant menu"
+                    width={50}
+                    height={50}
+                    className="rounded"
+                />
+               <Typography variant="h6" className="font-bold text-gray-800 mb-8">
+                    Your Order
+                </Typography>
+            </div>
+            <div className="flex justify-between mb-2 text-sm font-semibold text-gray-600">
+                <div className="w-[60%]">Item Name</div>
+                <div className="w-[20%]">Qty</div>
+                <div className="w-[20%] text-right">Price</div>
+            </div>
+            <Divider className="my-2" />
+    
+            <Box className="flex flex-col min-h-[100px] justify-between items-center py-3 overflow-y-auto w-full">
+                {isCartUpdated && (
+                    <LinearProgress
                         sx={{
                             width: "100%",
                             height: "6px",
@@ -124,65 +124,64 @@ const CartHistory = () => { // Managing checkbox state
                             backgroundColor: "lightgray",
                             mb: 1,
                         }}
-                    />}
-                    {fetchCart.length === 0 && loading ? (
-                        <LinearProgress sx={{ width: "100%", height: "6px", backgroundColor: "lightgray", mb: 1 }} />
-                    ) : (
-                        fetchCart.map((item, index) => {
-                            const cartItem = cart.find(cartItem => cartItem.itemId === item.id);
-                            const quantity = cartItem ? cartItem.quantity : 0;
-                            const itemTotal = item.price * quantity;
-                            const cartDescription = cartDescriptions.find(di => di.itemId === item.id);
-
-                            return (
-                                <div key={index} className="flex items-center justify-between gap-4 py-1 w-full">
-
-                                    <div className="flex items-center w-full">
-                                        <div className="flex-1 w-[50%]">
-                                            <Typography variant="body2" className="text-gray-700 text-sm">
-                                                {item.itemName}
-                                            </Typography>
-                                            <Typography
-                                                variant="caption"
-                                                className="text-blue-500 cursor-pointer"
-                                                onClick={() => setCustomizeModal(true)}
-                                            >
-                                                Customize
-                                            </Typography>
-                                            {isCustomizeModal && (
-                                                <CartDialog
-                                                    isOpen={isCustomizeModal}
-                                                    onClose={handleCustomizeModal}
-                                                    foodData={{ itemId: item.id, itemName: item.itemName }}
-                                                    onSubmit={handleItemDescription}
-                                                    cartDescription={String(cartDescription?.description || '')}
-                                                />
-                                            )}
-                                        </div>
-                                        <div className="w-[30%] flex items-center gap-4 justify-start">
-                                            <div className="flex items-center border px-2 py-1 bg-white-100">
-                                                <Button className="min-w-3 p-0 text-sm" onClick={() => removeFromCart(item.id)}>-</Button>
-                                                <span className="text-sm ml-2 font-semibold text-green-600">{quantity}</span>
-                                                <Button className="min-w-6 p-0 text-sm font-semibold text-green-600" onClick={() => addToCart(item.id)}>+</Button>
-                                            </div>
-                                        </div>
-
-                                        {/* Price Section */}
-                                        <div className="w-[15%] flex justify-end items-center">
-                                            <Typography variant="body2" className="font-semibold text-gray-800 text-sm">
-                                                €{itemTotal.toFixed(2)}  {/* Ensuring the price is formatted correctly */}
-                                            </Typography>
+                    />
+                )}
+                {fetchCart.length === 0 && loading ? (
+                    <LinearProgress sx={{ width: "100%", height: "6px", backgroundColor: "lightgray", mb: 1 }} />
+                ) : (
+                    fetchCart.map((item, index) => {
+                        const cartItem = cart.find(cartItem => cartItem.itemId === item.id);
+                        const quantity = cartItem ? cartItem.quantity : 0;
+                        const itemTotal = item.price * quantity;
+                        const cartDescription = cartDescriptions.find(di => di.itemId === item.id);
+    
+                        return (
+                            <div key={index} className="flex items-center justify-between gap-4 py-1 w-full">
+                                <div className="flex items-center w-full">
+                                    <div className="flex-1 w-[50%]">
+                                        <Typography variant="body2" className="text-gray-700 text-sm">
+                                            {item.itemName}
+                                        </Typography>
+                                        <Typography
+                                            variant="caption"
+                                            className="text-blue-500 cursor-pointer"
+                                            onClick={() => setCustomizeModal(true)}
+                                        >
+                                            Customize
+                                        </Typography>
+                                        {isCustomizeModal && (
+                                            <CartDialog
+                                                isOpen={isCustomizeModal}
+                                                onClose={handleCustomizeModal}
+                                                foodData={{ itemId: item.id, itemName: item.itemName }}
+                                                onSubmit={handleItemDescription}
+                                                cartDescription={String(cartDescription?.description || '')}
+                                            />
+                                        )}
+                                    </div>
+                                    <div className="w-[30%] flex items-center gap-4 justify-start">
+                                        <div className="flex items-center border px-2 py-1 bg-white-100">
+                                            <Button className="min-w-3 p-0 text-sm" onClick={() => removeFromCart(item.id)}>-</Button>
+                                            <span className="text-sm ml-2 font-semibold text-green-600">{quantity}</span>
+                                            <Button className="min-w-6 p-0 text-sm font-semibold text-green-600" onClick={() => addToCart(item.id)}>+</Button>
                                         </div>
                                     </div>
-
+    
+                                    {/* Price Section */}
+                                    <div className="w-[15%] flex justify-end items-center">
+                                        <Typography variant="body2" className="font-semibold text-gray-800 text-sm">
+                                            €{itemTotal.toFixed(2)} {/* Ensuring the price is formatted correctly */}
+                                        </Typography>
+                                    </div>
                                 </div>
-                            );
-                        })
-                    )}
-                </Box>
-
-            </CardContent>
-        </Card>
+                            </div>
+                        );
+                    })
+                )}
+            </Box>
+        </CardContent>
+    </Card>
+    
     );
 };
 

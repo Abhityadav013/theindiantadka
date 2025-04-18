@@ -104,7 +104,7 @@ const CartItem = () => {
             height={50}
             className="rounded"
           />
-          <Typography variant="h6" className="font-bold text-gray-800">
+          <Typography variant="h6" className="font-bold text-gray-800 mb-8">
             Your Order
           </Typography>
         </div>
@@ -113,7 +113,8 @@ const CartItem = () => {
                     <div className="w-[25%]">Qty</div>
                     <div className="w-[20%] text-right">Price</div>
                 </div>
-        <Divider className="my-2" />
+        <Divider className="my-5" />
+        
         <Box className="flex flex-col min-h-[100px] justify-between items-center py-3 overflow-y-auto">
           {isCartUpdated && <LinearProgress
             sx={{

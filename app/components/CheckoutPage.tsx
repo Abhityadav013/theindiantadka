@@ -51,7 +51,7 @@ const CheckoutPage:React.FC<StripeCheckoutProps> = ({amount,onClientSecretLoad})
             elements,
             clientSecret,
             confirmParams: {
-                return_url: 'http://localhost:3000/payment-success',
+                return_url: 'https://theindiantadka.vercel.app/payment-success',
             },
         });
         console.log('Stripe DOne',response)
