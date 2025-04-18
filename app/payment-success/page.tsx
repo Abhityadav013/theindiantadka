@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button, Card, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,50 +10,66 @@ const PaymentSuccess = () => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const cart: Cart[] = useSelector((state: RootState) => state.cart.cart);
-   const { customerOrder } = useSelector(
-      (state: RootState) => state.customerDetails,
-    );
+  const { customerOrder } = useSelector((state: RootState) => state.customerDetails);
+
+  const [isOrderSuccess, setIsOrderSuccess] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const hasRunRef = useRef(false);
+
+  // Create Order only once
   useEffect(() => {
-    // Assuming you have some payment status to check if payment is successful.
-    const paymentSuccessful = true; // Replace with actual check logic
+    if (hasRunRef.current || !cart || cart.length === 0) return;
 
-    if (paymentSuccessful) {
-      const createOrder = async () => {
-        try {
-          const response = await fetch('/api/create-order-success', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              orderDetails: cart,
-              orderType: customerOrder?.orderType, // Assuming this is the correct value for your order type
-            }),
-          });
+    const createOrder = async () => {
+      try {
+        const response = await fetch('/api/create-order-success', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderDetails: cart,
+            orderType: customerOrder?.orderType,
+          }),
+        });
 
-          const data = await response.json();
-          if (response.ok) {
-            // Order creation successful
-            dispatch({ type: "cart/updateCartOrderCreatedSaga" });
-          } else {
-            throw new Error(data.message || 'Failed to create order');
-          }
-        } catch (error) {
-          console.error('Error creating order:', error);
+        const data = await response.json();
+        if (response.ok) {
+          dispatch({ type: "cart/updateCartOrderCreatedSaga" });
+          dispatch({ type: "cart/fetchCartSaga" });
+          setIsOrderSuccess(true); // trigger countdown
+        } else {
+          throw new Error(data.message || 'Failed to create order');
         }
-      };
+      } catch (error) {
+        console.error('Error creating order:', error);
+      }
+    };
 
-      createOrder();
+    hasRunRef.current = true;
+    createOrder();
+  }, [cart, customerOrder, dispatch]);
 
-      // Redirect to the home page after 5 seconds
-      const timer = setTimeout(() => {
-        router.push('/');
-      }, 5000);
+  // Start countdown when success is true
+  useEffect(() => {
+    if (!isOrderSuccess) return;
 
-      // Clean up the timer when the component unmounts
-      return () => clearTimeout(timer);
-    } else {
-      console.error('Payment was not successful');
+    setCountdown(5); // start from 5 seconds
+  }, [isOrderSuccess]);
+
+  // Countdown logic
+  useEffect(() => {
+    if (countdown === null) return;
+
+    if (countdown === 0) {
+      router.push('/');
+      return;
     }
-  }, [cart, dispatch,customerOrder, router]);
+
+    const timer = setTimeout(() => {
+      setCountdown(prev => (prev !== null ? prev - 1 : null));
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [countdown, router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -72,9 +88,11 @@ const PaymentSuccess = () => {
         >
           Go to Home
         </Button>
-        <div className="mt-4 text-center text-sm text-gray-500">
-          You will be redirected to the homepage shortly...
-        </div>
+        {countdown !== null && (
+          <div className="mt-4 text-center text-sm text-gray-500">
+            You will be redirected to the homepage in <span className="font-semibold">{countdown}</span> second{countdown !== 1 && 's'}...
+          </div>
+        )}
       </Card>
     </div>
   );
